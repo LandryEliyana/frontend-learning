@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01-数据类型与隐式转换</title>
+</head>
+<body>
+    
+</body>
+
+<script>
+    // ============数据类型与隐式转换=============
+    // 1. typeof与数组检测
+    console.log("1. typeof与数组检测")
+    console.log(typeof null) // object
+    console.log(typeof []) // array ❌ object ✅ 数组也是Object类型
+    console.log(typeof {}) // object
+    console.log(typeof Array.isArray([])) // boolean
+    
+    // typeof的局限
+    /*
+        1. 无法准确判断 null，typeof null 返回的是object
+        2. 无法区分不同的引用类型（对象类型），所有的引用类型它均判断为object
+        3. 无法判断 NaN 和普通数字 typyof NaN返回的也是number
+    */
+
+    // 数组和对象的关系
+    /*
+        数组是一种特殊的对象，数组属于对象但对象不一定是数组
+        数组和对象都属于引用数据类型，都可以通过属性来访问数据
+        数组和普通对象主要有三个区别：
+        1. 数据的组织方式不同。数组通常存储的是有序的数据集合，通过索引来访问数据；
+        而普通对象通常存储键值对，通过属性名来访问数据。
+        2. 内置特性不同。数组具有 length 属性，还有push、pop、map、filter等方法，但普通对象没有这些方法
+        3. 原型链不同。数组的原型链通常是 数组实例 -> Array.prototype -> Object.prototype -> null
+        而普通对象的原型链是 对象实例 -> Object.prototype -> null
+    */
+
+    // 2. NaN的特殊行为
+    console.log("2. NaN的特殊行为")
+    console.log(typeof NaN) // number
+    console.log(NaN === NaN) // true ❌ false ✅  
+    console.log(Number.isNaN(NaN)) // true 
+    console.log(isNaN('hello')) // false ❌ true ✅
+
+    // NaN的含义
+    /*
+        NaN 是javascript中一个特殊的数值，全称是 Not a Number
+        NaN 代表一个计算错误，表示一个不正确或者未定义的数学操作得到的结果
+        主要特点：
+        1. NaN 属于number类型
+        2. NaN 不等于任何值，包括它自己 
+    */
+
+    // 全局 isNaN()和Number.isNaN()
+    /*
+        全局 isNaN() 会尝试将参数转换为数字然后判断转换后的结果是不是 NaN
+        Number.isNaN()不会将参数转换为数字，只有参数本身就是 NaN 时才会返回 true
+
+        例如 isNaN("hello") 返回 true，因为"hello"无法转换成有效的数字，
+        但 Number.isNaN("hello") 返回 false，因为"hello"不是 NaN
+    */
+
+    // 3. 宽松相等于严格相等
+    console.log("3. 宽松相等于严格相等")
+    console.log(null == undefined) // true  宽松相等比较中 null 只等于 udefined
+    console.log(null === undefined) // flase
+    console.log(0 == false) // true
+    console.log(0 === false) // flase
+
+    // == 与 === 的区别
+    /*
+        1. == 是宽松相等，当两端的数据类型不同时可能会进行隐式类型转换，
+        == 的比较先根据javascript的抽象相等比较规则进行转换，然后判断是否相等
+        2. === 是严格相等，当两端的数据类型不同时直接返回false
+    */
+
+    // 4. 数组为什么等于false
+    console.log("4. 数组为什么等于false")
+    console.log([] == false) // true
+    console.log([] === false) // false 
+    console.log(Boolean([])) // false ❌ true ✅  Boolean() 判断的是一个值的“真假性”，不会判断数组里有没有元素。在 JavaScript 中，所有普通对象都是真值，包括空数组 [] 和空对象 {}
+    console.log([] == 0) // true 
+
+    // 对象转原始值
+    /*
+        对象转原始值指的是将对象转换成字符串、数字等基本类型的值，比如对象参与数学运算、字符串拼接或者
+        与基本类型进行宽松相等比较时，就可能触发对象转原始值。主要有三种转换方式：
+        1. 优先检查对象是否定义了 Symbol.toPrimitive 方法，如果定义了就调用这个方法，并传入转换提示，返回一个原始值
+        2. 如果没有定义 Symbol.toPrimitive，就根据转换提示选择 valueOf() 和 toString() 的调用顺序。
+        对于数字优先的转换，先调用 valueOf()，如果没有返回原始值，再调用 toString()，反之同理。
+        3. 如果尝试之后仍然无法得到原始值，就会抛出 TypeError。
+    */
+
+    // 隐式类型转换
+    /*
+        隐式类型转换是指在运算或比较过程中，Javascript 引擎根据运算符的要求，自动将一个值转换为另一种类型，而不需要开发者显示调用的转换方方法。
+        常见的隐式转换方式：转换为字符串、转换为数字和转换为布尔值
+        1. 转换为字符串：当有 + 运算符时，比如数字 + 字符串，那么数字会被转换为字符串，然后进行字符串拼接
+        2. 转换为数字：当进行 -、*、/等算术运算及部分比较运算时，字符串会被转换为数字
+        3. 转换为布尔值：典型场景是 if、while 以及逻辑非运算符!，使用 == 也可能触发隐式转换
+    */
+
+    // Truthy 与 Falsy
+    /*
+        通过布尔值转换得到结果为 true 的值为 Truthy(真值)，反之就是 Falsy(假值)
+        常见的 Falsy 有 false、+0、-0、0n、“”、null、undefined 和 NaN，除了这些值都是 Truthy，
+        比如非空字符串、非零数字，以及所有数组和对象(包括 [] 和 {})
+        Truthy 与 Falsy 常用于 if、while、三元运算符以及 &&、||、! 等逻辑运算符
+    */
+
+    // 5. 字符串与数字转换
+    console.log("5. 字符串与数字转换")
+    console.log(1 + "2" + 3) // 6 ❌ 123 ✅  有 + 时，数字会被隐式转换为字符串，然后执行字符串拼接
+    // console.log(typeof (1 + "2" + 3)) // string
+    console.log(1 + 2 + "3") // 6 ❌ 33 ✅  + 具有左结合性
+    // console.log(typeof (1 + 2 + "3")) // string
+    console.log("5" - 2) // 3
+    console.log("5" * "2") // 10
+
+    // + 运算符的特殊性
+    /*
+        1. 作为二元运算符，既可以支持加法又可以支持字符串拼接，其他的运算符通常只支持数值运算
+        2. 作为一元运算符时，+ 通常用于将操作数转换为 Number 类型
+    */
+
+    // 运算顺序与数值转换
+    /*
+        运算顺序于数值转换主要涉及运算符优先级、结合性及隐式类型转换
+        1. 运算符优先级决定了表达式如何分组，比如乘除法优先级高于加减法，加括号可以改变默认运算顺序
+        2. 运算符优先级相同时，需要考虑结合性
+        3. 运算过程中可能发生隐式类型转换，JavaScript 会根据运算符的规则决定如何处理操作数
+    */
+
+    // 6. 字符串比较与运算关系
+    console.log("6. 字符串比较与运算关系")
+    console.log("10" < "2"); // true
+    console.log("10" < 2);  // false
+    console.log(null == 0); // false
+    console.log(null >= 0); // true
+
+    // 字符串按字典序比较
+    /*
+        当使用 <、>、<=、>= 等关系运算符比较两个字符串时，通常会按照字典顺序比较，而不是将字符串转换为数字后比较
+        1. Javascript字符串的比较是基于 UTF-16 码元值进行的。如果前面内容相同，则较短的字符串更小。
+        2. 当遇到第一个不同的码元时，就根据码元值大小决定比较结果。
+        3. 如果参与比较的不都是字符串，则可能发生隐式类型转换。
+    */
+
+    // 抽象关系比较
+    /*
+        抽象关系比较指的是 Javascript 在执行 >、<、>=、<= 等关系运算时，所使用的一套比较规则
+        1. 如果操作数是对象，则先转换为原始值。
+        2. 如果转换后的两个操作数都是字符串，则按照UTF-16码元字典序比较。
+        3. 如果不都是字符串，通常进入数值比较流程。
+    */
+
+    // null 比较规则
+    /*
+        1. 在宽松相等比较时，null 只等于 null 和 undefined，即 null == null 和 null == undefined 返回true
+        2. 在严格相等比较时，null === undefined 返回 false，null === null 返回 true
+        3. 使用 >、<、>=、<= 和进行关系比较时，null 会按照数值转换规则转换为 0
+    */
+
+    // 7. Object.is()
+    console.log("7. Object.is()")
+    console.log(Object.is(NaN, NaN)); // true
+    console.log(NaN === NaN);         // false
+
+    console.log(Object.is(+0, -0)); // true ❌ false ✅
+    console.log(+0 === -0); // false ❌ true ✅
+
+    // Object.is()
+    /*
+        Object.is()用于判断两个值是否为相同的值，采用的是 Samevalue 比较算法，它也不会进行隐式类型转换
+        1. Object.is(NaN, NaN)返回true，Object.is(+0, -0) 返回 false
+        2. 对于对象和数组，Object.is() 判断的是引用身份，而不是对象内容是否相同
+        3. 在实际开发中，Object.is() 用于需要精确比较值的场景。
+    */
+
+    // 严格相等和特殊数值的区别
+    /*
+        严格相等运算符 === 用于判断两个值是否严格相等，它不会进行隐式类型转换
+        对于 Number 中的一些特殊数值，要注意：
+        1. NaN === NaN 返回 false
+        2. +0 === -0 返回 true
+        3. Infinity === Infinity 返回 true，+ Infinity === -Infinity 返回 false
+    */
+
+</script>
+
+</html>
