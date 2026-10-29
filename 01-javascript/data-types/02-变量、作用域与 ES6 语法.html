@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02-变量、作用域与 ES6 语法</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============变量、作用域与 ES6 语法=============
+    // 1. 变量提升
+    console.log("1. 变量提升")
+    console.log(a); // udefined
+
+    var a = 10; 
+
+    console.log(a); // 10
+
+    // var 的提升行为及变量初始化
+    /*
+        1. 变量提升是指在执行代码前，Javascript 引擎会在创建执行上下文时处理 var 变量声明，
+        并将其初始化为 undefined，因此即使在声明语句前访问该变量，也不会因为变量尚未声明而报错，而是得到 undefined。
+        2. 变量提升并不意味着赋值操作会提前。
+        3. var 是函数作用域，而不是块级作用域，所以在函数内部使用 var 声明的变量，会在整个函数作用域内有效，
+        即使声明语句位于某个代码块中。
+    */
+
+    // 2. 暂时性死区
+    console.log("2. 暂时性死区")
+    console.log(typeof notDeclared); // undefined
+
+    {
+        // console.log(typeof value); // error Uncaught ReferenceError: Cannot access 'value' before initialization
+        let value = 10;  
+    }
+
+    // 未声明变量与暂时性死区中变量的区别
+    /*
+        1. 未声明变量是指在当前可访问的作用域链中，没有找到对应的变量绑定。如果直接访问这样的变量会抛出 ReferenceError，
+        如果使用 typeof，会返回 undefined。
+        2. 暂时性死区中变量是指 let 和 const 声明的变量，绑定已建立但尚未初始化。从进入对应的作用域到执行变量声明并完成初始化
+        这段区域称为暂时性死区(TDZ)。
+        3. var 声明的变量在执行上下文创建阶段就会初始化为 undefined。
+    */
+
+    // 3. 块级作用域
+    console.log("3. 块级作用域")
+    let x = 10;
+
+    {
+        let x = 20;
+        console.log(x); // 20
+    }
+
+    console.log(x); // 10
+
+    // 块级作用域
+    /*
+        块级作用域是指一对花括号 {} 创建的作用域，例如 if，while，for 或 独立代码块。
+        1. let 和 const 具有块级作用域，使用它们在代码块中声明的变量，只能在该代码块及其
+        内部作用域中访问，外部无法访问。
+        2. var 不具有块级作用域，即使在代码块中用 var 声明的变量也属于函数作用域或块级作用域。
+        3. 内部作用域变量可以访问外部作用域的变量，反之则不可。如果内外部作用域存在同名变量，则内部变量会遮蔽外部变量。
+        4. 块级作用域能够减少变量污染和命名冲突。 比如在 for 循环中使用 let，每次迭代可以创建独立的变量绑定，
+        从而避免 var 在异步回调中可能导致的变量共享问题。
+    */
+
+    // 变量遮蔽
+    /*
+        变量遮蔽是指内部作用域声明了一个和外部作用域同名的变量，在内部作用域访问这个变量名时，优先访问内部的这个变量而不是外部的。
+        1. 变量遮蔽是由 Javascript 的词法作用域和作用域链机制决定的。当访问一个变量名时，首先从当前的作用域中查找，
+        如果没有找到才会继续向外层查找。
+        2. 变量遮蔽不会直接改变外部变量的值。内部作用域和外部作用域有同名变量时，在外部访问得到的仍然是外部的变量。
+        3. 变量遮蔽还可能与暂时性死区有关。如果在内部用 let 或 const 声明同名变量，即使尚未执行到声明语句，
+        该内部变量也会遮蔽外部变量，此时访问它会触发 TDZ，抛出 ReferenceError。
+    */
+
+    // 4. const 与对象修改
+    console.log("4. const 与对象修改")
+    const user = {
+        name: "Alice"
+    };
+    user.name = "Bob";
+    console.log(user.name); // Bob
+    
+    // user = {
+    //     name: "Jack"
+    // } ❌  Uncaught TypeError: Assignment to constant variable.
+    
+    // 5. 逻辑或与空值合并
+    console.log("5. 逻辑或与空值合并")
+    const a1 = 0;
+    const b = "";
+
+    console.log(a1 || 100); // 100
+    console.log(a1 ?? 100); // 0
+
+    console.log(b || "default"); // true ❌ 0 ✅
+    console.log(b ?? "default") // default ❌ “” ✅
+
+    // || 与 ?? 的区别
+    /*
+        || 是逻辑或运算，?? 是空值合并运算符。两者都可以用于设置默认值，但核心区别在于判断左侧操作数的条件不同。
+        1. || 返回第一个不是 falsy 的操作数。
+        2. ?? 只判断左侧操作数是不是 undefined 或 null，如果是就返回右侧的操作数，反之则返回左侧操作数。 
+        3. 两者都具有短路求值特性，当左侧操作数已经能够确定结果时，右侧表达式就不会执行，并且两者返回的不一定是布尔值。
+    */
+
+    // 6. 解构赋值与默认值
+    console.log("6. 解构赋值与默认值")
+    const data = {
+        a2: null,
+        b2: undefined
+    };
+
+    const {
+        a2 = 10,
+        b2 = 20,
+        c = 30
+    } = data;
+
+    console.log(a2, b2, c); // null, undefined, 30 ❌ null, 20, 30   当取到的值是 undefined 时默认值才生效
+
+    // 解构默认值何时生效
+    /*
+        1. 解构默认值只有在解构得到的值严格等于 undefined 时才会生效。
+        2. 解构得到的事 null、0、false 或空字符串时默认值不会生效。
+        3. 数组解构也遵循同样的规则，当数组元素缺失或元素值为 undefined 时，会使用默认值。  
+    */
+</script>
+</html>
