@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03-引用、拷贝与数据结构</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============引用、拷贝与数据结构=============
+    // 1. 对象引用共享
+    console.log("1. 对象引用共享")
+    const obj1 = { count: 1 };
+    const obj2 = obj1;
+
+    obj2.count = 10;
+
+    console.log(obj1.count); // 10
+    console.log(obj1 === obj2); // true
+     
+    // 对象引用与赋值行为
+    /*
+        变量赋值的本质是将一个值赋给另一个变量，但是基本类型和对象类型在赋值后的表现有所不同。
+        1. 对于基本类型，赋值会复制对应的原始值。
+        2. 对于对象类型，赋值赋值的是对象引用的值，而不是复制整个对象。
+        3. 区分修改对象属性和重新赋值。修改对象属性不会改变变量指向哪个对象，
+        而重新赋值是让变量保存另一个值或指向另一个对象，不会直接改变原来的对象。
+        4. Javascript 函数参数采用值传递，当传入对象时，传递的是对象引用的副本，
+        因此函数内部可以通过参数修改原对象的属性，但重新给参数赋值不会改变外部变量的引用。
+    */
+
+    // 2. 浅拷贝
+    console.log("2. 浅拷贝")
+    const obj3 = {
+        name: "Alice",
+        info: {
+            age: 20
+        }
+    };
+
+    const obj4 = { ...obj3 }; // obj4 中的 info 复制的是 obj3 中 info 对象的引用
+
+    obj4.name = "Bob";
+    obj4.info.age = 30; // obj3 和 obj4 的 info 会同时改变
+
+    console.log(obj3.name); // Alice 浅拷贝后只改变第一层的属性名，二者互不影响
+    console.log(obj3.info.age); // 20 ❌ 30 ✅
+
+    // 展开语法
+    /*
+        展开语法用三个点 ... 表示，它可以表示将数组等可迭代对象展开为多个元素，或者将对象自身的可枚举属性复制到一个新对象中。
+        1. 在数组中，展开语法常用于复制数组、合并数组或传递函数参数。如[...arr1]可以创建一个新数组，[...arr1, ...arr2] 表示合并两个数组，
+        function(...arr) 表示将数组元素作为独立参数传入函数。
+        2. 在对象中，展开语法可以复制对象属性也可以合并对象。{...obj} 可以创建包含自身可枚举属性的新对象。如果合并过程中出现同名属性，后面的
+        属性会覆盖前面的属性。
+        3. 展开语法实现的是浅拷贝，不是深拷贝。它可以创建新的数组或对象，但如果其中包含嵌套对象，那么会共享嵌套对象的引用。
+        4. 展开语法和剩余语法虽然都使用 ...，但作用不同。 展开语法用于将数据展开，而剩余语法用于收集剩余元素或属性。
+    */
+
+    // 嵌套对象的引用
+    /*
+        对象属于引用类型，前套对象是指一个对象的属性值本身也是对象。
+        1. 嵌套对象的属性保存的是对象引用，而不是保存一份独立的对象副本。
+        2. 浅拷贝只复制对象的第一层属性。使用 {...obj} 或者 Object.assign() 复制对象时，会创建新的顶层对象，
+        但不会递归复制嵌套对象，所以嵌套属性仍然可能共享引用。
+        3. 修改嵌套对象的属性和重新给嵌套对象赋值是不一样的。修改嵌套对象的属性可能会影响共享该对象的其他引用，
+        但如果将某个嵌套属性重新赋值为一个新对象，只会改变当前对象的属性引用，不会直接修改原来的嵌套对象。
+        4. 如果希望两个对象完全独立，就需要根据实际数据结构选择合适的复制方式。 比如逐层使用展开语法，
+        或者对支持结构化克隆的数据使用 structuredClone()。
+    */
+
+    // 3. JSON深拷贝的局限性
+    const obj = {
+        a: undefined,
+        b: null,
+        c: [undefined],
+        d: NaN
+    };
+
+    const copy = JSON.parse(JSON.stringify(obj));
+
+    console.log(copy); // {b: null, c: [undefined], d: NaN} ❌ {b: null, c: [null], null} ✅
+
+    // JSON序列化对特殊值的处理
+    /*
+        JSON 序列化主要通过 JSON.stringify() 实现，可以将 Javascript 中的数据转换为 JSON 格式的字符串。
+        但 JSON 并不支持 Javascript 中的所有数据类型，所以在序列化特殊值时会有不同的处理规则。
+        1. 对于 undefined、函数和 Symbol 的处理，取决于所处的位置。如果它们是对象的属性值，则被忽略，如果是数组中的值则会被转换为 null，
+        如果直接序列化这些值，通常会得到 undefined。
+        2. 对于 NaN、Infinity 和 -Infinity，JSON.stringify() 会将它们转换为 null。
+        3. 对于 BigInt，默认情况无法直接序列化，会抛出 TypeError。
+        4. 对于一些特殊对象，也会发生信息丢失。 例如 Date 通常会转换为 ISO 格式的日期字符串，而 Map、Set 等对象默认不会保留其内部数据。
+    */
+
+    // 4. Set去重
+    console.log("3. Set去重")
+    const set = new Set([
+        { id: 1 },
+        { id: 1 },
+        1,
+        1
+    ]);
+
+    console.log(set.size); // 2 ❌ 3 ✅  两个 {id: 1} 的引用不同
+
+    // Set 中基本类型与对象引用的相等规则
+    /*
+        Set 是存储唯一值的的集合数据结构，同一集合中不能存在两个相等的值。
+        1. Set 使用 SameValueZero 算法判断值是否相等。对于基本类型，主要根据值本身进行比较，相等的值只保留一份。
+        需要注意的是 SameValueZero 认为 NaN 与 NaN 相等，+0 和 -0 相等。
+        2. 对于对象和数组，Set 比较的是 对象引用身份，而不是对象内容。
+    */
+
+    // 5. 可选链与空值合并
+    console.log("4. 可选链与空值合并")
+    const user = {
+        profile: null
+    }
+
+    console.log(user.profile?.name);  // undefined
+    console.log(user.profile?.name ?? "匿名用户"); // 匿名用户
+
+    // 可选链与空值合并结合使用
+    /*
+        在 Javascript 中，可选链 ? 与 ?? 经常配合使用，主要用于安全访问属性和设置默认值。
+        1. 可选链 ? 用于安全地访问对象属性或调用方法。如果 ? 左侧值为 null 或 undefined，则停止后续访问并返回 undefined，
+        避免因访问空值的属性而抛出 TypeError。
+        2. 空值合并符 ?? 用于提供默认值，只有左侧的值为 null 或 undefined 时，才会返回右侧默认值。
+        3. 两者结合使用时可以安全访问嵌套属性，并在属性为空时提供默认值。
+    */
+</script>
+</html>
