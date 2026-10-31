@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实现通用类型检测函数</title>
+</head>
+<body>
+    
+</body>
+<script>
+    /* 要求：函数应返回输入值的类型名称，统一使用小写字符串。
+    例如：
+        输入	     期望输出
+        123	        "number"
+        "hello"	    "string"
+        null	    "null"
+        undefined   "undefined"
+        []	        "array"
+        {}	        "object"
+        new Date()  "date"
+        /abc/	    "regexp"
+        new Map()	"map"
+        new Set()	"set"
+    其他常见原始类型也应能够正确处理。
+    不允许将所有类型逐个硬编码为一大段 if 判断，应该使用合理、可扩展的类型判断思路。
+    暂不要求防范对象伪造 Symbol.toStringTag 等特殊情况。
+    */ 
+
+    function getType(value) {
+        let type = Object.prototype.toString.call(value) 
+        return type.slice(8, -1).toLowerCase()
+    }
+
+    // 验收测试
+    console.assert(getType(null) === "null");
+    console.assert(getType([]) === "array");
+    console.assert(getType({}) === "object");
+    console.assert(getType(NaN) === "number");
+    console.assert(getType(new Date()) === "date");
+    console.assert(getType(/abc/) === "regexp");
+    console.assert(getType(new Map()) === "map");
+    console.assert(getType(Symbol("a")) === "symbol");
+    console.assert(getType(1n) === "bigint");
+    console.log("验收测试已执行"); // 控制台打印出这句话说明测试通过
+
+    // Object.prototype.toString.call(value) 得到的是 '[Object xxxxx]' 这样一个字符串
+</script>
+</html>
