@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实现支持循环引用的深拷贝</title>
+</head>
+<body>
+    
+</body>
+<script>
+    /* 
+    最低必须支持：
+        数字、字符串、布尔值、null、undefined 等原始值。
+        普通对象与数组，包含多层嵌套。
+        Date 和 RegExp。
+        循环引用。
+        多个属性引用同一个对象的情况。
+        拷贝后修改副本中的嵌套数据，不影响原始对象。
+    不允许使用 JSON.parse(JSON.stringify(...)) 或直接调用 structuredClone() 作为实现。
+    本题不强制支持函数、DOM 节点、特殊宿主对象。Map、Set 可以作为额外提高题。
+    */
+
+    function deepClone(value, cache = new WeakMap()) {
+        if (value === null || typeof(value) !== 'object') {
+            return value
+        } // 基本类型直接返回输入值
+        
+        // 同一个原对象只创建一个副本
+        if (cache.has(value)) {
+            return cache.get(value)
+        }
+        
+        let cloned
+        let type = Object.prototype.toString.call(value).toLowerCase()
+        if (type.includes('date')) {
+            cloned = new Date(value.getTime()) // Date 类型的深拷贝要用 getTime
+        } else if (type.includes('regexp')) {
+            cloned = new RegExp(value.source,value.flags) // 正则表达式的 source 是要匹配规则，flag 是匹配模式
+            cloned.lastIndex = value.lastIndex // 记录输入的 value 的匹配进度
+        } else {
+            // 数组需要创建数组，普通对象创建对象
+            cloned = Array.isArray(value) ? new Array(value.length) : {}
+        }
+
+        // 必须在递归之前记录对应关系：
+        // 因为递归过程中，可能会再次遇到当前正在拷贝的原对象。提前记录后，再次遇到它时，才能直接取出已经创建的副本，避免无限递归。
+        cache.set(value, cloned) // WeakMap 的键必须是对象，不能是原始值
+        console.log(cache)
+        for (const key of Object.keys(value)) {
+            cloned[key] = deepClone(value[key], cache)
+        }
+
+        return cloned
+        
+    }
+
+    // 基础测试
+    const original = {
+        name: "Alice",
+        info: {
+            age: 20,
+            skills: ["JavaScript", "TypeScript"]
+        }
+    };
+
+    const cloned = deepClone(original);
+
+    console.assert(cloned !== original);
+    console.assert(cloned.info !== original.info);
+    console.assert(cloned.info.skills !== original.info.skills);
+
+    cloned.info.age = 30;
+
+    console.assert(original.info.age === 20);
+
+    // // 循环引用测试
+    const obj = {
+        name: "Alice"
+    };
+
+    obj.self = obj;
+
+    const copy = deepClone(obj);
+
+    console.assert(copy !== obj);
+    console.assert(copy.self === copy);
+
+    // 共享引用测试
+    const shared = { score: 100 };
+
+    const source = {
+        a: shared,
+        b: shared
+    };
+
+    const result = deepClone(source);
+
+    console.assert(result.a !== shared);
+    console.assert(result.a === result.b); 
+
+    // Date 与 RegExp 测试
+    const source1 = {
+        date: new Date("2026-01-01"),
+        regex: /hello/gi
+    };
+
+    const result1 = deepClone(source1);
+
+    console.assert(result1.date !== source1.date);
+    console.assert(result1.date.getTime() === source1.date.getTime());
+
+    console.assert(result1.regex !== source1.regex);
+    console.assert(result1.regex.source === source1.regex.source);
+    console.assert(result1.regex.flags === source1.regex.flags);
+</script>
+</html>
