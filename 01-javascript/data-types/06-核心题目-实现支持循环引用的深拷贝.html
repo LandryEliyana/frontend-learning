@@ -46,7 +46,6 @@
         // 必须在递归之前记录对应关系：
         // 因为递归过程中，可能会再次遇到当前正在拷贝的原对象。提前记录后，再次遇到它时，才能直接取出已经创建的副本，避免无限递归。
         cache.set(value, cloned) // WeakMap 的键必须是对象，不能是原始值
-        console.log(cache)
         for (const key of Object.keys(value)) {
             cloned[key] = deepClone(value[key], cache)
         }
