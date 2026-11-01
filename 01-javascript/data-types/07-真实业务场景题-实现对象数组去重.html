@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实现数组对象去重</title>
+</head>
+<body>
+    
+</body>
+<script>
+    /*
+    业务背景：
+        假设你正在开发一个用户管理页面，后端返回了包含重复用户的数组。现在需要按指定字段去重，
+        保留第一次出现的记录。        
+    输入：
+        const users = [
+            { id: 1, name: "Alice" },
+            { id: 2, name: "Bob" },
+            { id: 1, name: "Alice Updated" },
+            { id: 3, name: "Charlie" },
+            { id: 2, name: "Bob Updated" }
+        ];
+    期望：
+        [
+            { id: 1, name: "Alice" },
+            { id: 2, name: "Bob" },
+            { id: 3, name: "Charlie" }
+        ]
+    要求：
+        函数接收对象数组和字段名。
+        保留第一次出现的记录。
+        保持原有相对顺序。
+        不修改原数组及其对象。
+        对空数组也能正常工作。
+        本题保证每个对象都存在指定字段，字段值为字符串或数字。
+    */
+
+    // 个人答案：
+    // function uniqueByKey(items, key) {
+    //     // if (items == []) {
+    //     //     return []
+    //     // }  
+    //     // 这个判断不对，判断数组为空不是这样判断，因为每次写 [] 都会创建一个新的数组对象，而两个不同数组比较时结果是 false
+    //     // 其实也不需要这个判断，因为空数组在后续的循环中会自然返回空数组
+
+    //     let result = []
+
+    //     let arr = []
+    //     items.forEach(element => {
+    //         arr.push(element[key])
+    //     });
+
+    //     let indexes = []
+    //     for (let index in arr) {
+    //         if (!arr.slice(0, index).includes(arr[index])) { // 这样的时间复杂度是 O(n²)
+    //             indexes.push(index)
+    //         }
+    //     }
+
+    //     for (let index of indexes) {
+    //         result.push(items[Number(index)])
+    //     }
+
+    //     return result
+    // }
+
+    // 最合理的答案：使用 Set
+    function uniqueByKey(items, key) {
+        let seen = new Set()
+        const result = []
+
+        for (const item of items) {
+            const value = item[key]
+
+            if (!seen.has(value)) {
+                seen.add(value)
+                result.push(item)
+            }
+        }
+
+        return result
+    }
+
+    // 测试代码
+    const users = [
+        { id: 1, name: "Alice" },
+        { id: 2, name: "Bob" },
+        { id: 1, name: "Alice Updated" },
+        { id: 3, name: "Charlie" },
+        { id: 2, name: "Bob Updated" }
+    ];
+
+    const result = uniqueByKey(users, "id");
+
+    console.assert(result.length === 3);
+    console.assert(result[0].name === "Alice");
+    console.assert(result[1].name === "Bob");
+    console.assert(result[2].id === 3);
+
+    console.assert(users.length === 5);
+    console.assert(result[0] === users[0]);
+</script>
+</html>
