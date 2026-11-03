@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作用域、闭包与函数机制</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============作用域、闭包与函数机制=============
+    // 1. var 与 let 的作用域
+    console.log("1. var 与 let 的作用域")
+    function test() {
+        var a = 10;
+
+        if (true) {
+            var a = 20;
+            let b = 30;
+
+            console.log(a, b); // 20, 30
+        }
+
+        console.log(a); // 20
+    }
+
+    test(); // 20, 30   20 
+
+    // 什么 var a 的变化会影响块外部的变量
+    /*
+        var 声明的变量具有函数作用域，而不是块级作用域。因此，if 花括号不会为 var 创建新的作用域。
+        所以，if 括号内外的 var a = 10 和 var a = 20 实际对应的是同一个变量绑定。
+        而且 var 允许在同一作用域中重复声明，因此第二次声明不会创建新的变量，但它的赋值表达式会执行，
+        将原来的 a 从 10 修改为 20
+    */
+
+    // 2. 词法作用域
+    console.log("2. 词法作用域")
+    let x = "global";
+
+    function foo() {
+        console.log(x);
+    }
+
+    function bar() {
+        let x = "local";
+        foo();
+    }
+
+    bar();  //  global
+
+    // 为什么 foo() 不会直接读取 bar() 中的局部变量
+    /*
+        Javascript 采用的是词法作用域，也叫静态作用域，其核心特点是：函数的作用域由函数定义的位置决定，而不是函数调用的位置决定。
+        上面这段代码中，foo() 函数定义在全局作用域，因此它的外层词法作用域是全局作用域，而不是 bar 创建的作用域。
+        当 foo() 执行 console.log(x) 时，Javascript 会先在 foo 自身的作用域中查找 x，由于没有找到，就沿着词法作用域链向外查找，
+        最终找到全局变量 x = "global"。
+        虽然 foo() 是在 bar() 内部调用的，但 bar 并不是 foo 的外层词法作用域，所以 foo 无法直接访问 bar 的局部变量 x = "local"。
+    */
+
+    // 3. 闭包与独立状态
+    console.log("3. 闭包与独立状态")
+    function createCounter() {
+        let count = 0;
+
+        return function () {
+            count++;
+            return count;
+        };
+    }
+
+    const counter1 = createCounter();
+    const counter2 = createCounter();
+
+    console.log(counter1()); // 1
+    console.log(counter1()); // 2
+    console.log(counter2()); // 1
+    console.log(counter1()); // 3
+
+    // 为什么 counter1 和 counter2 的计数不会互相影响
+    /*
+        这主要是由于 Javascript 的闭包机制，以及每次调用 createCounter() 都会创建新的词法环境。
+        1. 每次调用 createCounter()，都会创建一个新的局部变量 count，并将其初始化为 0.
+        2. createCount() 返回的内部函数形成了闭包。这个函数内部引用了外部函数中的 count，因此即使
+        createCounter() 已经执行结束，返回的函数荏苒可以访问和修改对应的 count。
+        3. counter1() 和 counter2() 是两次独立调用 createcounter() 创建的函数，它们分别引用不同
+        词法环境中的 count。
+        因此，调用 counter1() 只会修改 counter1 对应的 count，不会影响 counter2 对应的 count。
+    */
+
+    // 4. 闭包与 var 循环
+    console.log("4. 闭包与 var 循环")
+    const functions = [];
+
+    for (var i = 0; i < 3; i++) {
+        functions.push(function () {
+            return i;
+        });
+    }
+
+    console.log(functions[0]()); // 3
+    console.log(functions[1]()); // 3
+    console.log(functions[2]()); // 3   循环三次其实修改的都是同一个 i 
+
+    // 如果要让三个函数分别输出 0、1、2，有哪些修改方法
+    /*
+        原代码三个函数都会返回 ß3，主要是因为 var 具有函数级作用域，而不具有块级作用域。
+        因此，for 循环中三个函数引用的是同一个变量 i。
+        1. 最简单的方法是把 var 改为 let，for 循环中，let会为每次迭代创立的变量
+        2. 可以使用立即执行函数 IIFF。每循环一次都立即执行一次函数，将当前的 i 作为参数传入
+        3. 使用工厂函数，每次循环调用工厂函数，将当前的 i 传进去，再返回一个闭包，
+        让每个函数保存对独立参数变量的访问，具体修改为：
+        function createGetter(value) {
+            return function () {
+                return value;
+            };
+        }
+
+        const functions = [];
+
+        for (var i = 0; i < 3; i++) {
+            functions.push(createGetter(i));
+        }
+
+        console.log(functions[0]()); // 0
+        console.log(functions[1]()); // 1
+        console.log(functions[2]()); // 2
+    */
+
+    // 5. 闭包与 let 循环
+    console.log("5. 闭包与 let 循环")
+    const functions1 = [];
+
+    for (let i = 0; i < 3; i++) {
+        functions1.push(() => i);
+    }
+
+    console.log(functions1.map(fn => fn())); // [0, 1, 2]
+
+    // 为什么只把 var 改成 let，就可能改变第 4 题的执行结果
+    /*
+        这是因为 let 和 var 的作用域机制不同。
+        1. var 具有函数作用域，不具有块级作用域。使用 var 的话，循环中的三个箭头函数共享的是同一个 i，
+        当循环结束后，i 变成 3，三个函数的返回值也都是 3.
+        2. let 具有块级作用域。在循环中，Javascript 会为每次迭代创建独立的 i 变量绑定。
+        3. 闭包捕获的是变量绑定，而不是创建函数时变量值的简单副本。所以三个肩头函数引用的是不同迭代中的 i，
+        最终返回 0、1、2
+    */
+
+    // 6. 闭包引用的变量会发生变化吗？
+    console.log("6. 闭包引用的变量会发生变化吗？")
+    function createUser() {
+        const user = { age: 20 };
+
+        return {
+            getAge() {
+                return user.age;
+            },
+
+            setAge(age) {
+                user.age = age;
+            }
+        };
+    }
+
+    const account = createUser();
+
+    console.log(account.getAge()); // 20
+
+    account.setAge(30);
+
+    console.log(account.getAge()); // 30
+
+    // 闭包保存的是外部变量的值，还是对其词法绑定的访问能力？
+    /*
+        闭包保留的是对外部词法环境中变量绑定的访问能力，而不是简单复制变量在函数创建时的值。
+        1. 闭包依赖词法作用域。内部函数在定义时就确定了它能够访问的外部词法环境，
+        即使外部函数执行结束，内部函数仍然可以访问其中被保留的变量。
+        2. 这段代码中，getAge() 和 setAge() 都定义在同一次 createUser() 函数内部，
+        因此它们共享同一个外部变量 user。
+        3. 需要区分变量绑定和对象引用。 这里 user 是一个使用 const 声明的变量，
+        它的绑定不能重新赋值，但它引用的对象仍然可以被修改。
+        因此，闭包并不是保存了 user.age = 20 这个值，而是能够通过共享的 user 变量持续访问同一个对象。
+    */
+
+    // 7. 函数声明与函数表达式
+    console.log("7. 函数声明与函数表达式")
+    console.log(foo1()); // foo1
+
+    function foo1() {
+        return "foo1";
+    }
+
+    console.log(typeof bar1); // undefined
+
+    var bar1 = function () {
+        return "bar1";
+    };
+
+    console.log(bar1()); // bar1
+
+    // 如果 bar1 改成使用 const 声明，执行行为会发生什么变化
+    /*
+        如果 bar1 使用 const 声明，那么在执行到 console.log(typeof bar1) 时就会抛出 ReferenceError，而不是输出 undefined。
+        1. 函数声明有提升行为。function foo1() {} 在执行到声明语句前就已经完成初始化了，
+        因此可以提前调用 foo1()。
+        2. var 声明的变量也会被提升，并且会提前初始化为 undefined。 但函数表达式的赋值不会提前执行，
+        因此在 var bar1 = function () {} 执行之前，bar1 的值是 undefined。
+        3. const 声明的变量虽然也会在创建词法环境时建立绑定，但不会提前初始化，而是处于暂时性死区。
+        在执行到声明并完成初始化之前，访问该变量会抛出 ReferenceError。
+    */
+
+    // 8. 变量遮蔽与暂时性死区
+    console.log("8. 变量遮蔽与暂时性死区")
+    let value = "outer";
+
+    {
+        // console.log(value); // outer ❌ Uncaught ReferenceError: Cannot access 'value' before initialization
+
+        let value = "inner";
+    }
+
+    // 9. 立即执行函数 IIFE
+    console.log("9. 立即执行函数 IIFE")
+    const counter = (function () {
+        let count = 10;
+
+        return function (step) {
+            count += step;
+            return count;
+        };
+    })();
+
+    console.log(counter(2)); // 12
+    console.log(counter(3)); // 15
+
+    // IIFE 和普通函数调用有什么区别
+    /*
+        IIFE 是立即执行函数表达式，指的是在定义函数表达式后立即调用它的一种写法。
+        1. 执行时机不同。普通函数通常先定义，再通过函数名调用，而 IIFE 在创建函数表达式后立即执行，不需要后续再单独调用。
+        2. IIFE 可以创建独立的函数作用域。函数内部通过 var、let 或 const 声明的局部变量不会直接污染外部作用域。
+        3. IIFE 可以结合闭包使用。如果 IIFE 返回一个内部函数，内部函数可以保留对 IIFE 局部变量的访问能力，从而实现私有状态。
+    */
+
+    // 现代 JavaScript 还有哪些实现私有状态的方式
+    /*
+        1. 闭包。可以通过工厂函数创建局部变量，然后返回访问这些变量的方法，由于外部无法直接访问函数内部的局部变量，因此可以实现私有状态。
+        2. Class 私有字段。ES2022 引入了标准的 # 私有字段语法，例如 #count。它只能在声明它的类内部通过合法语法访问，外部无法直接读取或修改。
+        3. ES Modules。 每个模块都有独立的模块作用域，只有通过 export 显式导出的内容才能被其他模块直接导入。没有导出的变量可以作为模块内部状态。
+        4. WeakMap。 可以将对象实例作为键，把私有状态保存在 WeakMap 中。只要 WeakMap 本身不向外暴露，外部通常无法直接读取对应的内部数据。
+    */
+
+    // 10. 高阶函数与柯里化
+    console.log("10. 高阶函数与柯里化")
+    const add = a => b => c => a + b + c;
+
+    const addTwo = add(2);
+
+    console.log(addTwo(3)(4)); // 9
+    console.log(addTwo(5)(6)); // 13
+
+    // 柯里化有什么实际用途
+    /*
+        函数柯里化指的是将一个接收多个参数的函数，转换为一系列一次只接收一个参数的函数。
+        1. 函数柯里化可以实现参数复用。当多个函数调用具有相同的参数时，可以提前固定这些参数，
+        生成更具体的函数，避免重复传参。
+        2. 柯里化有利于函数组合。通过把函数拆分为逐层接收参数的形式，可以方便的组合多个函数，构建数据处理流程。
+        3. 柯里化可以用于配置复用。 例如先指定请求地址、日志级别或校验规则，再生成处理具体数据的函数。
+        4. 柯里化通常依赖闭包实现。内层函数可以访问外层函数已经接收的参数，因此能逐步收集参数，直到执行最终逻辑。
+    */
+
+    // 柯里化与简单地使用默认参数有什么不同
+    /*
+        1. 默认参数主要用于提供参数的备用值。当调用函数没有传入摸个参数，或者显式传入 undefined，就会使用预先设置的默认值。
+        它不会改变函数原本的调用结构。
+        2. 柯里化是一种函数转换技术。 它将一个接收多个参数的函数转换为一系列逐步接收参数的函数。
+        3. 柯里化可以通过闭包保存前面传入的参数，从而生成新的专用函数。
+        4. 两者的适用场景不同。如果只是希望参数缺失时使用默认值，使用默认参数即可；如果希望根据不同配置动态生成函数，
+        并将这些参数传给 map、filter 等高阶函数，柯里化通常更加合适。
+    */
+</script>
+</html>
