@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原型链与对象模型</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============原型链与对象模型=============
+    // 1. 原型链上的属性查找
+    console.log("1. 原型链上的属性查找")
+    const parent = {
+        name: "Parent"
+    };
+
+    const child = Object.create(parent);
+
+    console.log(child.name);   // Parent
+
+    child.name = "Child";
+
+    console.log(child.name);  // Child
+    console.log(parent.name); // Parent
+
+    // 当执行 child.name = "Child" 时，为什么不一定修改 parent.name？如果删除 child.name 呢？
+    /*
+        在 Javascript 中，对象可以通过原型链继承其他对象的属性，但属性的读取和属性赋值行为并不相同。
+        1. 读取属性时，Javascript 会沿原型链查找。如果对象自身没有这个属性，就会继续在它的原型对象上查找。
+        2. 当执行 child.name = "Child" 时，如果继承的 name 是普通、了写的数据属性，Javascript 通常会在
+        child 自身创建一个同名属性，而不是修改 parent.name。这种现象称为属性遮蔽，因为后续读取属性时会优先查找对象自身，
+        所以 child.name 返回 "Child"，但 parent.name 仍然是 "Parent"。。
+        3. 执行 delete child.name，删除的是 child 自身的属性，不会删除原型上的 parent.name。
+        4. 赋值不一定总是创建自身属性。如果原型上存在同名访问器属性的 setter，赋值可能触发 setter；如果是不可写的数据属性，
+        赋值可能失败。
+    */
+
+    // 2. prototype 与实例原型
+    console.log("2. prototype 与实例原型")
+    function Person(name) {
+        this.name = name;
+    }
+
+    const p = new Person("Alice");
+
+    console.log(Person.prototype === Object.getPrototypeOf(p));  // true
+
+    console.log(Person.prototype.constructor === Person);    // true
+
+    console.log(Object.getPrototypeOf(Person.prototype) === Object.prototype); // true
+
+    console.log(Object.getPrototypeOf(Object.prototype));  // null
+
+    // Person.prototype 和 Object.getPrototypeOf(p) 有什么区别？为什么它们通常能够指向同一个对象？
+    /*
+        Person.prototype 和 Object.getPrototypeOf(p) 的含义不同，但在正常使用 new Person() 创建实例时，它们通常指向同一个对象。
+        1. Person.prototype 是构造函数 Person 的一个属性。它通常引用一个对象，这个对象会被用作通过 new Person() 创建实例的原型。
+        2. Object.getPrototpeOf(p) 是用来获取实例对象 p 的内部 [[Prototype]] 引用。这个内部引用用于原型链上的属性查找。
+        3. 两者通常相等，是因为 new 操作符在创建普通构造函数实例时，会将新对象的内部原型设置为构造函数当前 prototype 属性所应用的对象。
+        因此，Person.prototype === Object.getPrototypeOf(p) 通常返回 true。
+        但是，两者并不是始终相等。例如，在实例创建之后重新给 Person.prototype 赋值，旧实例的内部原型不会自动跟着改变。
+        所以，Person.prototype是从构造函数角度访问原型对象，而 Object.getPrototypeof(p) 是从实例角度获取实际的原型对象。
+    */
+
+    // 3. 对象属性遮蔽与 delete
+    console.log("3. 对象属性遮蔽与 delete")
+    const parent1 = {
+        value: 100
+    };
+
+    const child1 = Object.create(parent1);
+
+    child1.value = 200;
+
+    console.log(child1.value);   // 200
+
+    delete child1.value; // 删除的是 child1 的 value，原型上的 value 没有被删除
+
+    console.log(child1.value);   // undefined ❌ 100 ✅
+    console.log(Object.hasOwn(child1, "value"));  // false。hasOwn 判断的是对象自身的属性
+
+    // delete 删除的是对象自身的属性，还是会沿着原型链继续删除？
+    /*
+        delete 运算符用于删除对象的属性。对于普通对象，它只尝试删除对象自身属性，不会沿着原型链继续删除继承的属性。
+        1. 属性读取和删除的机制不同。读取 obj.name 时，如果自身对象没有属性，JavaScript 会沿着原型链查找；
+        但执行 delete obj.name 时，只针对 obj 自身进行删除。
+        2. 如果对象自身存在同名属性，并且该属性也可以被删除，那么 delete 会删除这个自身属性。删除后，如果原型链上
+        还有同名属性，那么再次访问时就会读取原型上的属性。
+        3. 如果对象自身不存在该属性，即使原型链上存在同名属性，delete 也不会删除原型属性。 对普通对象来说，这种情况下通常返回 true。
+        4. delete 是否成功还取决于属性的 configurable 特性。如果对象自身的属性不可配置，那么非严格模式下删除失败会返回 false，
+        严格模式下会抛出 TypeError。
+    */
+    
+    // 4. in 与 Object.hasOwn()
+    console.log("4. in 与 Object.hasOwn()")
+    const parent2 = {
+        x: 10
+    };
+
+    const child2 = Object.create(parent2);
+
+    child2.y = 20;
+
+    console.log("x" in child2);  // true
+    console.log(Object.hasOwn(child2, "x")); // false
+
+    console.log("y" in child2);  // true
+    console.log(Object.hasOwn(child2, "y")); // true
+
+    // 在遍历对象属性时，for...in 与 Object.keys() 有什么区别？
+    /*
+        for ... in 和 Object.keys() 都可以用来遍历对象的属性，但它们的主要区别在于是否遍历原型链，以及返回结果的形式。
+        1. for ... in 会遍历对象自身以及原型链上可枚举的字符串属性。因此、如果对象继承了可枚举属性，也可能被遍历出来。
+        2. Object.keys() 只返回对象自身可枚举的字符串属性名，不包含原型链上的属性。
+        3. 返回形式不同。for ... in 是循环语句，每次迭代得到一个属性名；而 Object.keys() 返回一个数组，
+        可以直接配合 map()、filter()、forEach() 等数组方法使用。
+        4. 两者都不会遍历 Symbol 属性，也不包含不可枚举属性。
+    */
+
+    // 5. new 与构造函数返回值
+    console.log("5. new 与构造函数返回值")
+    function Person1() {
+        this.name = "Alice";
+        return 100;
+    }
+
+    function Person2() {
+        this.name = "Bob";
+        return { name: "Charlie" };
+    }
+
+    const p1 = new Person1();
+    const p2 = new Person2();
+
+    console.log(p1.name);    //  Alice
+    console.log(p2.name);    // Clarlie
+    console.log(p1 instanceof Person1); // true
+    console.log(p2 instanceof Person2); // false
+
+    // 为什么构造函数显式返回原始值和返回对象时，new 的行为可能不同？
+    /*
+        使用 new 调用普通构造函数时，JavaScript 会创建一个新对象，并将其作为构造函数内部的 this。
+        1. 如果构造函数没有显示返回值，或者显示返回的是原始值，new 会忽略这个返回值，最终返回创建的新实例。
+        2. 如果构造函数显示返回一个非 null 的对象，那么 new 会使用这个对象作为最终结果，而不是默认创建的实例。
+        3. 这里的对象不仅包括普通对象，还包括数组、函数等引用类型的值。因为函数在 Javascript 中也是对象，
+        所以显式返回函数同样会替代默认实例。
+        4. null 是一个特殊情况。虽然 typeof null 返回的是 object，但 null 是一个原始值，因此构造函数返回 null时，
+        任然返回默认创建的实例。
+    */
+
+    // 6. instanceof 与原型链
+    console.log("6. instanceof 与原型链")
+    function Animal() {}
+
+    function Dog() {}
+
+    Dog.prototype = Object.create(Animal.prototype);
+    Dog.prototype.constructor = Dog;
+
+    const dog = new Dog();
+
+    console.log(dog instanceof Dog);    // true
+    console.log(dog instanceof Animal); // true
+    console.log(dog instanceof Object); // true
+    console.log(Dog.prototype instanceof Animal); // true
+
+    // instanceof 是判断一个对象由哪个构造函数创建的吗？为什么这种说法不够准确？
+    /*
+        instanceof 通常不是判断一个对象有哪个构造函数创建的，而是判断构造函数的 prototype 对象
+        是否出现在待检测对象的原型链上。
+        1. 在普通情况下，obj instanceof Constructor 会检查 Constructor.prototype 当前引用
+        的对象是否存在于 obj 的原型链上。如果存在返回 true，否则返回 false。
+        2. 这种判断与对象实际创建来源并不完全等价。比如对象可以通过 Object.create() 指定原型，
+        即使没有调用某个构造函数，instanceof 也可能返回 true。
+        3. 原型链是可以被修改的。如果通过 Object.setPrototypeOf() 修改对象的原型，
+        或重新赋值构造函数的 prorotype，那么 instanceof 的结果可能发生变化。
+        4. instanceof 还支持通过 Symbol.hasInstance 自定义判断逻辑。 因此，它的完整语义不一定只是检查原型链。
+    */
+
+    // 7. 重新赋值 prototype
+    console.log("7. 重新赋值 prototype")
+    function Person() {}
+
+    Person.prototype.name = "Old";
+
+    const p11 = new Person();
+
+    Person.prototype = {
+        name: "New"
+    };
+
+    const p22 = new Person();
+
+    console.log(p11.name);  // Old
+    console.log(p22.name);  // New
+
+    console.log(p11 instanceof Person); // true ❌ false ✅
+    console.log(p22 instanceof Person); // true
+
+    // 为什么重新赋值 Person.prototype 不会自动改变已有实例的原型？
+    /*
+        1. 当使用 new Person() 创建实例时，JavaScript 会读取构造函数当时的 prototype 属性，
+        并将这个原型对象设置为新实例的内部 [[Prototype]]。
+        2. 实例创建完成之后，它的内部 [[Prototype]] 就已经建立了独立的原型引用关系。 后续重新给 Person.prototype 赋值，
+        只是让构造函数的 prototype 属性指向另一个对象，不会自动更新已有实例的内部原型。
+        3. instanceof 在默认情况下检查的是构造函数当前的 prototype 是否存在于实例的原型链上。
+    */
+
+    // 8. Object.create(null)
+    console.log("8. Object.create(null)")
+    const obj1 = {};
+
+    const obj2 = Object.create(null);
+
+    console.log("toString" in obj1); // true
+    console.log("toString" in obj2); // false
+
+    console.log(Object.getPrototypeOf(obj1) === Object.prototype); // true
+
+    console.log(Object.getPrototypeOf(obj2));  // null
+
+    // 为什么某些字典或键值映射场景会考虑使用 Object.create(null)？与 Map 相比又有什么不足？
+    /*
+        1. Object.create(null) 可以创建一个原型为 null 的对象。它不继承 Object.prototype，因此不会自动具有
+        toString、constructor、hasOwnProperty 等属性。
+        2. 这种对象适合作为字符串键字典。 因为它不存在继承属性造成的名称冲突，也没有继承的 __proto__ 访问器，
+        所以对于动态生成的属性名，使用起来更加直接。
+        3. 与 Map 相比，Object.create(null) 仍然存在局限性。 对象的属性键只能是字符串或 Symbol，
+        而 Map 可以使用数字、对象、函数等任意 JavaScript 值作为键。
+        4. Map 还提供了 set()、get()、has()、delete()、size 等专门的键值映射 API，并且可以直接迭代，按照键首次插入的顺序遍历。
+    */
+</script>
+</html>
