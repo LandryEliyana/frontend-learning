@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>class、继承与 super</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============class、继承与 super=============
+    // 1. class 继承与方法重写
+    console.log("1. class 继承与方法重写")
+    class Animal {
+        speak() {
+            return "Animal";
+        }  // speak 挂在 Animal.prototype 上 
+    }
+
+    class Dog extends Animal {
+        speak() {
+            return "Dog";
+        }
+    }
+
+    const dog = new Dog();
+
+    console.log(dog.speak());    // Dog
+    console.log(dog instanceof Animal);   // true
+    console.log(Object.hasOwn(dog, "speak"));  // true ❌  false ✅ 
+
+    // 为什么 dog 可以调用 speak()，但它自身却不一定有名为 speak 的属性？
+    /*
+        在 Javascript 中，使用 class 语法定义的普通实例方法，默认是定义在类的 prorotype 对象上，而不是每个实例对象自身。
+        1. 属性访问遵循原型链查找机制。当执行 dog.speak() 时，会先查找 dog 自身是否存在 speak 属性，如果不存在，就会沿着原型链向上查找。
+        2. 在这段代码中，Dog 重写了父类 Animal 的 speak() 方法。因此会在 Dog.prototype 上找到 speak，并优先调用它。
+        3. Object.hasOwn(dog, "speak") 只检查 dog 对象自身是否拥有这个属性，不会沿着原型链查找。因为 speak 定义在 Dog,prototype，
+        所以结果是 false。
+    */
+
+    // 2. class 方法与 this
+    console.log("2. class 方法与 this")
+    class Counter {
+        constructor() {
+            this.count = 10;
+        }
+
+        getCount() {
+            return this.count;
+        }
+    }
+
+    const counter = new Counter();
+
+    const fn = counter.getCount;   
+
+    try {
+        console.log(fn());     // undefined ❌   class 内部的方法默认使用严格模式
+    } catch (error) {
+        console.log(error.name);  // TypeError ✅
+    }
+
+    console.log(counter.getCount());  // 10
+
+    // 为什么将类方法赋值给变量后再直接调用，可能出现错误？如何解决？
+    /*
+        Javascript 中，类的普通实例方法通常定义在类的 prototype 上，而且不会自动绑定实例的 this。
+        1. 当使用 obj.method() 的形式调用类方法时，this 指向调用该方法的实例对象。
+        2. 如果将类方法赋值给一个变量，再通过这个变量直接调用，就会丢失原来的隐式绑定。
+        3. avaScript 的 Class 方法默认运行在严格模式下。 因此，如果类方法脱离对象后直接调用，this 就是 undefined。
+        如果方法内部尝试访问 this.name，就会抛出 TypeError。
+        4. 可以通过 bind() 显示绑定实例，或者使用箭头函数包装，保证方法执行时的 this 正确。
+    */
+
+    // 3. 静态方法与实例方法
+    console.log("3. 静态方法与实例方法")
+    class User {
+        static role = "admin";
+
+        role = "guest";
+
+        static getRole() {
+            return this.role;
+        }
+    }
+
+    const user = new User();
+
+    console.log(User.role);      // admin
+    console.log(user.role);      // guest
+    console.log(User.getRole());  // admin
+    console.log(typeof user.getRole);  // undefined
+
+    // 静态方法与实例方法分别存放在哪里？静态方法可以通过实例直接调用吗？
+    /*
+        Class 的静态方法和普通实例方法最大的区别在于它们定义的位置和调用方式不同。
+        1. 静态方法使用 static 关键字声明，它直接定义在类的构造函数对象。
+        2. 普通实例方法默认定义在类的 prototype 对象上，而不是每个实例自身。实例可以通过原型链查找到这些方法。
+        3. 实例通常不能直接调用静态方法。
+        4. 静态方法适合实现工具方法、工厂方法以及与某个类相关但不依赖具体实例的逻辑；实例方法则适合处理每个实例自身的状态和行为。
+    */
+
+    // 4. super 调用父类方法
+    console.log("4. super 调用父类方法");
+    class Parent {
+        constructor(name) {
+            this.name = name;
+        }
+
+        getName() {
+            return this.name;
+        }   
+    }
+
+    class Child extends Parent {
+        constructor() {
+            super("Alice");     // 此时 this.name = Alice
+            this.name = "Bob";  // this.name = Bob 已经将 Alice 覆盖
+        }
+
+        getName() {
+            return super.getName() + "!";   // super.getName() 表示去 Parent.prorotype 上查找 getName 方法
+        }
+    }
+
+    const child = new Child();
+
+    console.log(child.getName());  // Alice ❌  Bob! ✅
+
+    console.log(
+        Object.getPrototypeOf(Child.prototype) === Parent.prototype
+    );   // true
+
+    console.log(
+        Object.getPrototypeOf(Child) === Parent
+    );   // false ❌  true ✅
+
+    // super.getName() 执行时，方法内部的 this 指向父类实例还是当前子类实例？
+    /*
+        super.getName() 调用的是父类原型上的方法，但这个方法执行时的 this 仍然指向当前子类实例。
+        1. super 主要用于从父类原型开始查找方法，并不会创建一个独立的父类实例。
+        2. 当子类实例调用 child.getName() 时，this 指向 child。在子类方法内部执行 super.getName()，
+        会查找并调用 Parent.prototype.getName，同时保留当前的 this，也就是 child。
+        所以，super 决定从哪里查找方法，而 this 决定方法操作的是哪个对象。两者是不同的概念。
+    */
+</script>
+</html>
