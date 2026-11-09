@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map、Set 与迭代器</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Map、Set 与迭代器=============
+    // 1. Set、Map 与对象引用
+    console.log("1. Set、Map 与对象引用")
+    const a = { id: 1 };
+    const b = { id: 1 };
+
+    const set = new Set([NaN, NaN, a, b]);
+
+    const map = new Map([
+        [a, "A"],
+        [b, "B"]
+    ]);
+
+    console.log(set.size);   // 3
+    console.log(map.size);   // 2
+    console.log(map.get(a)); // A
+    console.log(map.get({ id: 1 })); // undefined
+
+    // 为什么 Set 可以去重两个 NaN，但不会按内容去重两个不同的对象？
+    /*
+        1. 对于 NaN，SameValueZero 会认为两个 NaN 相等。 虽然 NaN === NaN 的结果是 false，
+        但 Set 可以将它们识别为同一个值，所以两个 NaN 只会保留一个。
+        2. 对于对象，SameValueZero 判断的是引用身份，而不是对象的属性内容。即使两个对象的属性完全相同，
+        只要它们是分别创建的对象，引用身份就不同，因此 Set 会将它们视为不同元素。
+        3. 如果两个变量引用的是同一个对象，那么它们在 Set 中会被识别为重复元素。
+    */
+
+    // 2. Generator 与迭代协议
+    function* counter() {
+        yield 1;
+        yield 2;
+        return 3;
+    }
+
+    const iterator = counter();
+
+    console.log(iterator.next());  // 1 ❌  {value: 1, done: false} ✅ 
+
+    console.log([...counter()]);   // [1, 2]
+
+    console.log(iterator.next());  // 2 ❌  {value: 2, done: false} ✅ 
+
+    console.log(iterator.next());  // 3 ❌  {value: 2, done: true} ✅ 
+
+    // Generator 的 yield 与 return 有什么区别？为什么通过展开语法获得的数组不一定包含 Generator 的最终返回值？
+    /*
+        在 Javascript 中，Generator 是一种可以暂停和恢复执行的特殊函数，通过 function* 定义。
+        1. yield 用于产出一个值并暂停 Generator。当调用 next() 时，执行到 yield 会返回一个形如 {value, done: false} 的结果，
+        表示当前产出了一个值，但 Generator 尚未执行结束。
+        2. return 用于结束 Generator。如果执行到 return，next() 会返回 { value, done: true }，
+        表示 Generator 已经完成执行。
+        3. 展开语法 ... 会通过迭代器协议消费 Generator。它会不断调用 next()，收集 done: false 时的 value，
+        当遇到 done: true 时停止迭代，并忽略这次返回的 value。
+        因此，Generator 的最终 return 值可以通过手动调用 next() 获取，但不会作为普通迭代元素出现在展开语法生成的数组中。
+    */
+</script>
+</html>
