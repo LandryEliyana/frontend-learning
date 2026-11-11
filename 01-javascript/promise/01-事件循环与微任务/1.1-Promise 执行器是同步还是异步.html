@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise 执行器是同步还是异步？</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Promise 执行器是同步还是异步？=============
+    console.log("Promise 执行器是同步还是异步？")
+    console.log("A");
+
+    const promise = new Promise(resolve => {
+        console.log("B");
+        resolve("C");
+    });
+
+    promise.then(value => {
+        console.log(value);
+    });
+
+    console.log("D");    
+    // A -> B -> D -> C 
+
+    // Promise 构造函数执行器与 .then() 回调的执行时机
+    /*
+        Javascript 中，Promise 构造函数执行器和 .then() 回调的执行时机不同。
+        1. Promise 构造函数接受的 executor 执行器是同步执行的。当执行 new Promise(executor) 时，
+        Javascript 会立即调用执行器，而不是把执行器放入微任务队列。
+        2. 调用 resolve() 或 reject() 用于确定 Promise 的状态或最终结果，但不会同步执行 .then() 中的回调。
+        3. .then() 方法本身是同步调用的，但传入的回调函数会异步执行。对于已兑现的 Promise，其 .then() 回调会作为微任务执行；
+        对于尚未完成的 Promise，则需要等到状态确定之后再安排相应的微任务。
+        4. 在浏览器的事件循环中，当前同步代码执行结束后，会先清空微任务队列，再执行下一轮任务。
+        因此，Promise 的创建和执行器执行是同步的，而 .then() 的回调执行是异步的，通常通过微任务调度。
+    */
+
+    // 创建 Promise 是否意味着执行器中的代码自动进入微任务队列？
+    /*
+        创建 Promise 并不意味着执行其中的代码会自动进入微任务队列。
+        1. new Promise(executor) 中的执行器是同步执行的。 当 JavaScript 执行到 new Promise() 时，会立即调用执行器，
+        执行其中的同步代码。
+        2. Promise 本身不会自动把同步代码变成异步代码。即使在执行器中编写耗时计算，这些代码仍然会占用当前 Javascript 执行线程。
+        3. 真正通过微任务调度的是 Promise 的反应回调。例如 .then()、.catch() 和 .finally() 注册的回调，
+        在对应的 Promise 状态确定后，才会被安排为微任务。
+        4. 调用 resolve() 并不意味着执行器立即结束，也不会同步触发 .then() 回调。执行器中 resolve() 后面的同步代码仍然会继续执行。
+    */
+</script>
+</html>

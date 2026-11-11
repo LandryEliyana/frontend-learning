@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>同步代码、定时器与微任务</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============同步代码、定时器与微任务=============
+    console.log("同步代码、定时器与微任务")
+    console.log(1);
+
+    setTimeout(() => {
+        console.log(2);
+    }, 0);
+
+    Promise.resolve().then(() => {
+        console.log(3);
+    });
+
+    queueMicrotask(() => {
+        console.log(4);
+    });
+
+    console.log(5);
+    // 1 -> 5 -> 4 -> 3 -> 2 ❌ 
+    // 1 -> 5 -> 3 -> 4 -> 2 ✅
+
+    // 为什么定时器设置为 0 毫秒，也不意味着回调立即执行？
+    /*
+        在 JavaScript 中，setTimeout(callback, 0) 并不表示立即执行回调，而是表示希望经过尽可能短的延迟后，
+        由事件循环安排执行回调。
+        1. setTimeout() 是一个异步定时器 API。调用它时，Javascript 会注册定时器，而不会立即执行回调函数。
+        2. 定时器到期不等于回调立即执行。回调必须等待当前正在执行的 Javascript 任务结束，
+        才能由事件循环在合适的时机调度。
+        3. 浏览器中，当前任务结束后通常还需要先处理微任务队列，因此，即使 setTimeout() 的延迟是 0，它的回调
+        通常也会晚于已经安排的 Promise .then() 微任务执行。
+        4. 浏览器还可能对定时器设置最小延迟。 例如嵌套层级较深的定时器可能受到至少 4 毫秒的延迟限制，
+        后台页面的定时器也可能被节流。
+    */
+</script>
+</html>

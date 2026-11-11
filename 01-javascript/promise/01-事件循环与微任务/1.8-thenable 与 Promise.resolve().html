@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>thenable 与 Promise.resolve()</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============thenable 与 Promise.resolve()=============
+    console.log("thenable 与 Promise.resolve()")
+    const thenable = {
+        then(resolve) {
+            console.log("thenable");
+            resolve("success");
+        }
+    };
+
+    console.log("A");
+
+    Promise.resolve(thenable).then(value => {
+        console.log(value);
+    });
+
+    console.log("B");
+    // A -> B -> thenable -> success
+
+    // thenable 对象、Promise 状态采纳与微任务
+    /*
+        Thenable 是指具有可调用 then 方法的对象或函数，它不一定是真正的 Promise，但可以表现出类似的 Promise 的行为。
+        1. 当 Promise 通过 resolve()、Promise.resolve() 或 .then() 的返回值接收到 Thenable 时，会按照 Promise 解析规则尝试采纳它的结果，
+        而不是直接将 Thenable 对象作为兑现值。
+        2. 采纳 Thenable 时，会读取它的 then 属性，并通过 Promise 的专门任务异步调用这个 then 方法。 
+        因此，Thenable 的 then 方法不会在调用 Promise.resolve(thenable) 的同步过程中直接执行。
+        3. Thenable 可以通过传入的 resolve 或 reject 回调决定最终结果。 如果它最终兑现，外层 Promise 就会采用相应结果；如果拒绝，
+        外层 Promise 也会被拒绝。
+        4. Promise 的状态采纳过程可能引入额外的微任务。 因此，使用 Thenable 或返回另一个 Promise，可能改变不同 Promise 回调之间的执行顺序。
+    */
+
+    // 为什么一个对象只要具有适当的 then() 方法，就可能被 Promise 机制当作 thenable 处理？
+    /*
+        1. Thenable 指具有可调用 then 方法的对象或函数。 它不一定通过 new Promise() 创建，也不一定具有原生 Promise 的内部结构。
+        2. Promise 解析机制会检查对象的 then 属性。 如果这个属性是函数，就可以按照 Thenable 规则处理它。
+        3. 处理 Thenable 时，Promise 机制会调用其 then 方法，并传入用于解决和拒绝的回调函数。 Thenable 可以通过调用这些回调，决定外层 Promise 最终采用的结果。
+        4. 这种机制主要是为了实现互操作性。 不同库或框架实现的类 Promise 对象，只要遵循适当的 then 调用约定，就可以与原生 Promise、Promise.resolve() 和 await 协同工作。
+    */
+</script>
+</html>

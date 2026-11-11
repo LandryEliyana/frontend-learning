@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>async 函数中的同步部分</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============async 函数中的同步部分=============
+    console.log("async 函数中的同步部分")
+    async function foo() {
+        console.log("A");
+
+        await Promise.resolve();
+
+        console.log("B");
+    }
+
+    console.log("C");
+
+    foo();
+
+    console.log("D");
+    // C -> A -> D -> B
+
+    // async 函数执行、await 挂起与微任务恢复
+    /*
+        1. 调用 async 函数时，函数体会立即开始同步执行，直到遇到需要挂起的 await 或函数执行结束。
+        同时，async 函数始终返回一个 Promise。
+        2. 执行到 await 时，会先求值 await 后面的表达式，然后暂停当前 async 函数的后续执行，把控制权交还给外部调用代码。 
+        这里暂停的是当前异步函数，而不是阻塞整个 JavaScript 线程。
+        3. 即使 await 后面是一个普通值，或者一个已经兑现的 Promise，await 后面的代码也不会立即同步继续执行，而是通过微任务恢复。
+        4. 如果等待的 Promise 兑现，await 表达式得到兑现值，函数继续执行；如果 Promise 被拒绝，
+        则会在 await 位置抛出异常，可以通过 try...catch 捕获。
+    */
+    // async 函数是否从头到尾都是异步执行的
+    /*
+        async 函数并不是从头到尾都异步执行的。
+        1. 调用 async 函数时，函数体会立即开始同步执行。在遇到 await 之前，普通同步语句的执行方式与普通函数基本相同。
+        2. 当执行到 await 时，JavaScript 会先求值 await 后面的表达式，然后暂停当前 async 函数的后续代码，
+        将控制权交还给外部调用流程。
+        3. 无论 await 后面是普通值，还是已经兑现的 Promise，后续代码都不会在当前同步调用中继续执行，而是通过微任务恢复。
+        4. async 函数始终返回一个 Promise，但这并不代表函数体中的所有代码都会自动变成异步任务。 如果函数中存在耗时同步计算，
+        它仍然可能阻塞 JavaScript 主线程。
+        因此，async 函数是立即开始执行、在 await 处异步恢复，而不是整个函数体一开始就被放入微任务队列。
+    */
+</script>
+</html>

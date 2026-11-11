@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>await 非 Promise 值</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============await 非 Promise 值=============
+    console.log("await 非 Promise 值")
+    async function test() {
+        console.log(1);
+
+        const result = await 10;
+
+        console.log(result);
+    }
+
+    test();
+
+    console.log(2);
+    // 1 -> 2 -> 10
+
+    // await 普通值的行为
+    /*
+        1. 当 await 遇到普通值时，会按照 Promise 的解析规则处理这个值。 对于数字、字符串等普通值，
+        可以近似理解为 await Promise.resolve(value)。
+        2. 即使等待的是普通值，await 仍然会暂停当前 async 函数的后续执行。await 后面的代码不会立即同步执行，而是通过微任务恢复。
+        3. 普通值会直接成为 await 表达式的结果。 例如 const result = await 100，恢复执行后，result 就是 100。
+        4. await 暂停的是当前异步函数，不会阻塞整个 JavaScript 线程。 因此外部同步代码可以继续执行。
+    */
+
+    // await 10 与直接执行 const result = 10 在后续代码的执行时机上有什么区别？
+    /*
+        await 10 和直接执行 const result = 10，最终得到的值都是数字 10，但两者对后续代码的执行时机有本质区别。
+        1. 直接执行 const result = 10 是普通同步赋值。 JavaScript 会立即完成赋值，然后继续同步执行后面的代码。
+        2. 执行 const result = await 10 时，JavaScript 会先对 10 求值，然后暂停当前 async 函数的后续执行。
+        3. 对于普通值，可以将 await 10 近似理解为 await Promise.resolve(10)。 当前异步函数会通过微任务恢复，
+        恢复后 result 才获得 10，然后继续执行后续代码。
+    */
+</script>
+</html>
