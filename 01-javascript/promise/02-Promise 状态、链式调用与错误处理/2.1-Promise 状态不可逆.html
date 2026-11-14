@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise 状态不可逆</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Promise 状态不可逆=============
+    console.log("Promise 状态不可逆")
+    let resolvePromise;
+
+    const promise = new Promise(resolve => {
+        resolvePromise = resolve;
+    });
+
+    resolvePromise(1);
+    resolvePromise(2);
+
+    promise.then(value => {
+        console.log(value);
+    });  // 1
+
+    // Promise 状态一旦确定，后续调用 resolve() 或 reject() 是否仍能改变结果？
+    /*
+        不能。Promise 的结果具有一次确定、不可逆的特点。
+        1. Promise 一旦从 Pending 转变为 Fulfilled 或 Rejected，就不能再改变状态，也不能修改兑现值或拒绝原因。
+        2. 对同一个 Promise，首次调用 resolve() 或 reject() 后，后续再次调用这些函数，通常不会产生作用。
+        3. 调用 resolve() 不一定意味着 Promise 立即进入 Fulfilled 状态。如果 resolve() 接收的是另一个 Promise 或 Thenable，
+        当前 Promise 会尝试采纳它的最终结果，在此期间可能仍处于 Pending 状态。
+        4. 即使处于状态采纳过程中，后续再调用 resolve() 或 reject()，也不能覆盖第一次有效调用确定的结果。
+    */
+</script>
+</html>

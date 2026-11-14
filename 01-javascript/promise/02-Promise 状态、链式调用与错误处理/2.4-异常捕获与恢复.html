@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>异常捕获与恢复</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============异常捕获与恢复=============
+    console.log("异常捕获与恢复")
+    Promise.resolve()
+        .then(() => {
+            throw new Error("failed");
+        })
+        .catch(error => {
+            console.log(error.message);
+            return "recovered";
+        })
+        .then(value => {
+            console.log(value);
+        });
+    // failed -> recovered
+
+    // Promise 错误传播、.catch() 返回值
+    /*
+        Promise 的错误传播依赖链式调用中的状态传递机制。每次调用 .then() 或 .catch()，都会返回一个新的 Promise，
+        其状态由对应回调的执行结果决定。
+        1. 当 Promise 被拒绝，或者 .then() 回调抛出异常时，错误会沿着 Promise 链向后传播。如果中间没有对应的拒绝处理器，
+        成功回调就会被跳过，直到遇到 .catch() 或其他拒绝处理器。
+        2. .catch() 本质上相当于 .then(undefined, onRejected)，用于处理前面 Promise 链中的拒绝。
+        3. .catch() 执行后，并不意味着整个 Promise 链就会结束。如果 .catch() 回调正常返回一个普通值，那么它返回的新 Promise 会以该值兑现，
+        后续 .then() 就会继续执行。
+        4. 如果 .catch() 回调没有显式返回值，新 Promise 通常会以 undefined 兑现；如果重新抛出异常，或者返回一个被拒绝的 Promise，
+        错误则会继续向后传播。
+    */
+    // 为什么执行 .catch() 后，Promise 链不一定继续保持 rejected 状态？
+    /*
+        执行 .catch() 后，Promise 链不一定继续保持 Rejected 状态，因为每次调用 .catch() 都会返回一个新的 Promise。
+        1. .catch() 本质相当于 .then(undefined, onRejected)，用于处理前一个 Promise 的拒绝。
+        2. 如果 .catch() 回调正常执行并返回一个普通值，那么它返回的新 Promise 就会以该值兑现，状态变为 Fulfilled。
+        因此，后续 .then() 的成功回调可以继续执行。
+        3. 如果 .catch() 回调没有显式 return，就相当于返回 undefined，新 Promise 同样会兑现。
+        4. 如果 .catch() 回调重新抛出异常，或者返回一个最终被拒绝的 Promise，那么新 Promise 才会继续处于 Rejected 状态。
+    */
+</script>
+</html>

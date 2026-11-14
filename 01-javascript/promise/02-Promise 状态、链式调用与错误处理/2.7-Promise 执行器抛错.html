@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise 执行器抛错</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Promise 执行器抛错=============
+    console.log("Promise 执行器抛错")
+    const promise = new Promise((resolve, reject) => {
+        console.log("A");
+
+        throw new Error("boom");
+    });
+
+    promise
+        .then(() => {
+            console.log("B");
+        })
+        .catch(error => {
+            console.log(error.message);
+        });
+
+    console.log("C");
+    // A -> C -> boom
+
+    // Promise 执行器同步抛错、拒绝状态、异常传播。
+    /*
+        Promise 构造函数的执行器是同步的，但是执行器内部同步跑出的异常，会被 Promise 构造机制捕获，并转换成 Promise 拒绝的结果。
+        1. 当执行 new Promise(executor) 时，执行器会立即同步执行。如果执行器在 Promise 尚未被解决时抛出异常，
+        那么 Promise 会进入 Rehected 状态，拒绝原因就是跑出的异常。
+        2. 这种异常通常不会直接从 new Promise() 向外同步抛出。因此，外部普通的 try ... catch 通常不能捕获执行器内部抛出的异常，
+        应该使用 Promise 的 .catch() 或拒绝回调来处理。
+        3. 虽然执行器中的异常是同步产生的，但 .catch() 回调依然是异步执行的。它会作为 Promise 反应微任务，在当前同步代码结束后执行。
+        4. 如果 Promise 已经通过 resolve() 或 reject() 锁定了结果，那么之后执行器再抛出异常，也不能覆盖此前确定的结果。
+        5. 如果拒绝没有被处理，拒绝原因可能沿着 Promise 链继续传播，并最终触发未处理 Promise 拒绝事件或警告。
+    */
+
+    // Promise 执行器内部抛错与普通同步函数抛错，对外部调用者的影响有什么不同？
+    /*
+        1. 普通函数内部抛出的异常，会沿当前 Jaavascript 调用栈向外传播。如果调用者使用 try...catch 包裹函数调用，
+        就可以直接捕获异常；如果没有处理，异常会继续向外传播。
+        2. Promise 执行器虽然也是同步执行的，但 Promise 构造机制会自动捕获执行器内部抛出的异常。如果 Promise 尚未被解决，
+        这个异常会转换为 Promise 的 Rejected 状态，而不是直接从 new Promise() 向外抛出。
+        3. 因此，外部普通的 try...catch 通常无法捕获 Promise 执行器内部的异常。 调用者应该通过返回的 Promise 注册 .catch()，
+        或者使用 await 配合 try...catch 来处理拒绝。
+        4. Promise 执行器中的异常是同步产生的，但 .catch() 回调会通过微任务异步执行。
+        5. 这种自动捕获只针对执行器同步执行期间发生的异常，不包括执行器启动的定时器等异步回调中之后发生的异常。
+    */
+</script>
+</html>

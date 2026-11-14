@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>finally 中抛出异常</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============finally 中抛出异常=============
+    console.log("finally 中抛出异常")
+    Promise.resolve("success")
+        .finally(() => {
+            throw new Error("final error");
+        })
+        .then(value => {
+            console.log(value);
+        })
+        .catch(error => {
+            console.log(error.message);
+        });
+    // finall error
+    
+    // finally 抛出异常后的状态变化
+    /*
+        当 .finally() 回调抛出异常时，.finally() 返回的新 Promise 会变成 Rejected 状态，拒绝原因就是抛出的异常。
+        1. 如果原 Promise 是 Fulfilled，.finally() 抛出异常后，新 Promise 会变成 Rejected。 原来的兑现值不会继续向后传递。
+        2. 如果原 Promise 已经是 Rejected，.finally() 再次抛出异常，那么新的异常会覆盖原来的拒绝原因。
+        3. .finally() 不会修改原 Promise 的状态。 因为每次调用 .finally() 都会返回一个新的 Promise，发生状态变化的是这个新 Promise，
+        原 Promise 仍然保持原来的状态和结果。
+        4. 如果 .finally() 正常完成，那么它会透传原 Promise 的状态和结果。 只有在回调抛出异常，或者返回最终被拒绝的 Promise、Thenable 时，才会使用新的拒绝原因。
+    */
+</script>
+</html>

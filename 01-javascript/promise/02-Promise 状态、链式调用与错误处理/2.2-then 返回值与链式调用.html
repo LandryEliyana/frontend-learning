@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>then 返回值与链式调用</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============then 返回值与链式调用=============
+    console.log("then 返回值与链式调用")
+    Promise.resolve(1)
+        .then(value => {
+            return value + 1;
+        })
+        .then(value => {
+            console.log(value);
+            return value * 2;
+        })
+        .then(value => {
+            console.log(value);
+        });
+
+    console.log("sync");
+    // sync -> 2 -> 4
+
+    // 每次调用 .then()，得到的是原 Promise 还是新 Promise？
+    /*
+        每次调用原生 Promise 的 .then() 方法，都会返回一个新的 Promise，而不是原来的 Promise。
+        1. .then() 方法本身是同步调用的，会立即返回一个新的 Promise。 但是传入的回调函数会通过微任务异步执行。
+        2. 新 Promise 的状态和结果由 .then() 回调的执行结果决定。 如果回调返回普通值，新 Promise 会以该值兑现；如果回调抛出异常，新 Promise 会被拒绝。
+        3. 如果回调返回另一个 Promise 或 Thenable，新 Promise 会采用它的最终状态和结果，而不是简单地将它作为普通值。
+        4. 如果没有提供对应的回调，原 Promise 的结果或拒绝原因通常会继续向后传递
+    */
+</script>
+</html>

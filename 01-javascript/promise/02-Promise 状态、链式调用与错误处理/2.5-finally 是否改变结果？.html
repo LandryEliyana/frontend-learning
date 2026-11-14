@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>finally 是否改变结果？</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============finally 是否改变结果？=============
+    console.log("finally 是否改变结果？")
+    Promise.resolve("A")
+        .finally(() => {
+            return "B";
+        })
+        .then(value => {
+            console.log(value);
+        });
+    // A
+
+    // .finally() 的返回值处理
+    /*
+        1. .finally() 无论前一个Promise 是 Fulfilled 还是 Rejected，都会执行回调，而且这个回调不会自动接收
+        前一个 Promise 的兑现值或拒绝原因。
+        2. .finally() 每次调用都会返回一个新的 Promise。 如果回调正常执行并返回普通值，那么这个普通返回值通常会被忽略，
+        新 Promise 会继续传递原来的兑现值或拒绝原因。
+        3. 如果 .finally() 回调返回一个 Promise 或 Thenable，新 Promise 会等待它确定结果。如果它成功兑现，仍然保留，
+        仍然保留原来的结果。
+        4. 如果 .finally() 回调抛出异常，或者返回一个最终被拒绝的 Promise，那么新的拒绝原因会覆盖原来的结果，
+        使 .finally() 返回的 Promise 处于 Rejected 状态。
+    */
+
+    // .finally() 在什么情况下会改变后续 Promise 链的最终结果？
+    /*
+        .finally() 通常用于执行清理操作。它会返回一个新的 Promise，正常情况下不会改变原 Promise 的状态和结果。
+        1. 如果 .finally() 回调正常执行，并返回普通值或没有返回值，那么后续 Promise 会继续传递原来的兑现值或拒绝原因。
+        2. 如果 .finally() 回调抛出异常，那么它返回的新 Promise 会被拒绝，新的异常会覆盖原来的结果。 即使原 Promise 已经成功，
+        也会导致后续 Promise 链进入拒绝状态。
+        3. 如果 .finally() 回调返回一个最终被拒绝的 Promise 或 Thenable，那么新的拒绝原因同样会覆盖原结果。
+        4. 如果 .finally() 返回一个尚未完成的 Promise，后续链会等待它完成。 如果它最终兑现，则保留原结果；如果最终拒绝，
+        则使用新的拒绝原因。
+    */
+</script>
+</html>
