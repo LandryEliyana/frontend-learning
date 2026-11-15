@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise.all 的结果顺序</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Promise.all 的结果顺序=============
+    console.log("Promise.all 的结果顺序")
+    const p1 = new Promise(resolve => {
+        setTimeout(() => resolve("slow"), 30);
+    });
+
+    const p2 = Promise.resolve("fast");
+
+    Promise.all([p1, p2]).then(result => {
+        console.log(result);
+    });
+    // slow -> fast ❌  ['slow', 'fast'] ✅
+
+    // Promise.all() 结果顺序与完成顺序
+    /*
+        Promise.all() 返回的结果数组顺序由输入的可迭代对象的遍历顺序决定，而不是由各个 Promise 的完成顺序决定的。
+        1. Promise.all() 接收一个可迭代对象，并返回一个新的 Promise。它会等待输入中的所有 Promise 都成功兑现，
+        然后将结果组成数组。
+        2. 多个 Promise 可以在时间上交错推进，完成顺序可能不同。但 Promise.all() 会按照输入顺序保存每个 Promise 的结果。
+        3. 即使某个 Promise 最后才完成，它的结果仍然会放在与其输入位置对应的数组索引中。 因此，完成顺序不会影响最终结果数组的排列。
+        4. 如果任意一个 Promise 被拒绝，那么 Promise.all() 返回的 Promise 就会以相应的拒绝原因拒绝，
+        不再等待所有 Promise 成功。
+    */
+</script>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise.allSettled</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Promise.allSettled=============
+    console.log("Promise.allSettled")
+    Promise.allSettled([
+        Promise.resolve(1),
+        Promise.reject("error")
+    ]).then(result => {
+        console.log(result.map(item => item.status));
+    });
+    // ['fulfilled', 'rejected']
+
+    // allSettled() 与 all() 的区别
+    /*
+        Promise.all() 和 Promise.allSettled() 都同时等待多个异步操作，但它们最大的区别在于对失败的处理方式和最终返回的结果结构。
+        1. Promise.all() 要求所有输入 Promise 都成功兑现。 只要有一个被拒绝，它返回的 Promise 就会尽早被拒绝，
+        这就是 Fail-Fast（快速失败）机制。
+        2. Promise.allSettled() 不要求所有任务都成功。 它会等待每个输入 Promise 都进入 Fulfilled 或 Rejected 状态，
+        然后返回一个包含所有任务结果的数组。
+        3. 两者都会保证结果数组的顺序与输入顺序一致，而不是按照任务完成顺序排列。
+        4. Promise.all() 成功时返回的是兑现值数组，而 Promise.allSettled() 返回的是状态结果对象数组。每个结果对象通过 status 表示成功或失败，
+        5. 两者都不会自动取消已经启动的异步任务。
+    */
+</script>
+</html>

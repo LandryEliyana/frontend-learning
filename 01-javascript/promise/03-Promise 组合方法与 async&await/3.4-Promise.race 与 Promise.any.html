@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise.race 与 Promise.any</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Promise.race 与 Promise.any=============
+    console.log("Promise.race 与 Promise.any")
+    Promise.race([
+        Promise.reject("A"),
+        new Promise(resolve => {
+            setTimeout(() => resolve("B"), 20);
+        })
+    ])
+        .then(value => console.log(value))
+        .catch(error => console.log(error));
+
+    Promise.any([
+        Promise.reject("C"),
+        Promise.resolve("D")
+    ]).then(value => {
+        console.log(value);
+    });
+    // A -> D ❌  D -> A ✅   race 的 .catch() 比 any 的 .then() 多经过一层 Promise 状态传递
+
+    // 最先 settled 与最先 fulfilled 的区别
+    /*
+        1. Settled 表示 Promise 已经结束 Pending 状态，进入 Fulfilled 或 Rejected 中的任意一种状态。 
+        因此，成功和失败都属于 Settled。
+        2. Fulfilled 只表示 Promise 成功兑现，不包含 Rejected。
+        3. Promise.race() 关注最先 Settled 的 Promise。 无论最先完成的是成功还是失败，它返回的 Promise 都会采用这个结果。
+        4. Promise.any() 关注最先 Fulfilled 的 Promise。 它会忽略单个 Promise 的拒绝，只要有一个成功，就以这个成功结果兑现。
+        5. 如果所有输入 Promise 都被拒绝，Promise.any() 才会拒绝，并返回一个包含所有拒绝原因的 AggregateError。
+    */
+</script>
+</html>

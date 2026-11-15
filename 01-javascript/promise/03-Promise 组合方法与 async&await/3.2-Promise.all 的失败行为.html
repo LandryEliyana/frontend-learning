@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise.all 的失败行为</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Promise.all 的失败行为=============
+    console.log("Promise.all 的失败行为")
+    Promise.all([
+        Promise.resolve(1),
+        Promise.reject("failed"),
+        Promise.resolve(3)
+    ])
+        .then(() => {
+            console.log("success");
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    // ['sucess', 'failed'] ❌  'failed' ✅
+
+    // Promise.all() 的 fail-fast 行为
+    /*
+        1. Promise.all() 接收一个可迭代对象，并返回一个新的 Promise。如果所有输入都成功兑现，
+        那么返回的 Promise 会以包含全部结果的数组兑现，结果与输入顺序一致。
+        2. 只要任意一个输入 Promise 被拒绝，Promise.all() 返回的 Promise 就会被拒绝，不需要等待其他 Promise 全部完成。
+        3. 整体 Promise 的拒绝原因是最先触发整体拒绝的那个输入 Promise 的拒绝原因，而不是按照输入数组索引选择错误。
+        4. Fail-Fast 不等于自动取消其他异步操作。 即使 Promise.all() 已经被拒绝，其他已经启动的网络请求、定时器等仍然可能继续执行。
+        因此，Promise.all() 的 Fail-Fast 是结果聚合层面的快速拒绝，而不是任务执行层面的自动终止。
+    */
+</script>
+</html>
