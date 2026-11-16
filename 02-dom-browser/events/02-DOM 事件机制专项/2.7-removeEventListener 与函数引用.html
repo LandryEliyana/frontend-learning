@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>removeEventListener 与函数引用</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============removeEventListener 与函数引用=============
+    console.log("removeEventListener 与函数引用")
+    const button = document.createElement("button");
+
+    button.addEventListener("click", () => {
+        console.log("A");
+    });
+
+    button.removeEventListener("click", () => {
+        console.log("A");
+    });
+
+    button.click(); // A
+
+    // 为什么两段函数代码完全相同，却不一定意味着它们是同一个函数对象？如何正确移除监听器？
+    /*
+        Javascript中，函数之间的相等比较主要依据引用身份，而不是函数代码是否相同。
+        1. 每次求值函数表达式或箭头函数表达式。通常都会创建一个新的函数对象。即使两个函数的代码完全相同，它们也具有不同的引用。
+        2. removeEventListener() 移除监听器时，不会比较两个函数的代码内容，而是根据事件类型、回调函数引用以及 capture 配置进行匹配。
+        3. 因此，注册监听器时如果使用匿名函数，移除时再写一个代码完全相同的匿名函数，是无法成功移除的。
+        4. 正确做法是保存原来的函数引用，并在注册和移除时使用同一个函数对象，同时确保 capture 配置一致。
+        5. 也可以使用 once: true，或者 AbortController 配合 signal 来管理监听器生命周期。
+    */
+</script>
+</html>

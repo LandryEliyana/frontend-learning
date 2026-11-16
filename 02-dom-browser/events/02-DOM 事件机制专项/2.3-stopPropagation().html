@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stopPropagation()</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============stopPropagation()=============
+    console.log("stopPropagation()")
+    const parent = document.createElement("div");
+    const child = document.createElement("button");
+
+    parent.append(child);
+
+    parent.addEventListener("click", () => {
+        console.log("parent");
+    });
+
+    child.addEventListener("click", event => {
+        console.log("child A");
+        event.stopPropagation();
+    });
+
+    child.addEventListener("click", () => {
+        console.log("child B");
+    });
+
+    child.click();
+    // child B -> child A ❌  child A -> child B ✅    打印顺序按注册顺序来
+
+    // stopPropagation() 是否会阻止当前元素上其他监听器继续执行？与 stopImmediatePropagation() 有什么区别？
+    /*
+        stopPropagation() 和 stopImmediatePropagation() 都可以阻止事件继续传播，但它们对当前元素上的其他监听器有不同的影响。
+        1. stopPropagation() 只阻止事件沿传播路径继续传递，不会阻止当前元素上其他已注册事件监听器执行。
+        2. stopImmediatePropagation() 不仅会阻止事件继续传播，还会阻止当前元素上尚未执行的其他监听器执行。
+        3. 这两个方法都不会自动阻止事件的默认行为。 如果需要阻止表单提交、链接跳转等默认行为，应该使用 preventDefault()。
+    */
+</script>
+</html>

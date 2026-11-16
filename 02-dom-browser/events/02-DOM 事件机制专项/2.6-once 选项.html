@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============once 选项=============
+    console.log("once 选项")
+    const button = document.createElement("button");
+
+    button.addEventListener("click", () => {
+        console.log("clicked");
+        }, {
+        once: true
+    });
+
+    button.click(); // clicked
+    button.click(); 
+    button.click(); 
+
+    // 除了手动调用 removeEventListener()，还有什么方式可以控制监听器的生命周期？
+    /*
+        除了手动调用 removeEventListener()，还可以通过 addEventListener() 的 once 和 signal 选项管理事件监听器的生命周期。
+        1. 使用 once: true，它表示监听器最多执行一次，执行后浏览器会自动移除，适合首次点击、一次性初始化等场景。
+        2. 使用 AbortController 配合 signal。注册监听器时传入 control.signal，之后调用 controller.abort()，
+        就可以自动移除关联的监听器。
+        3. 在组件化开发中，还应当结合组件生命周期清理监听器。 例如在 Vue 中通过 onMounted() 注册事件，
+        在 onUnmounted() 时清理，避免组件销毁后留下不必要的监听器。
+        4. 对于动态列表，可以使用事件委托。将监听器绑定在稳定的父元素上，避免为大量动态子元素分别注册和移除监听器。
+    */
+</script>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stopImmediatePropagation()</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============stopImmediatePropagation()=============
+    console.log("stopImmediatePropagation()")
+    const parent = document.createElement("div");
+    const child = document.createElement("button");
+
+    parent.append(child);
+
+    parent.addEventListener("click", () => {
+        console.log("parent");
+    });
+
+    child.addEventListener("click", event => {
+        console.log("first");
+        event.stopImmediatePropagation();
+    });
+
+    child.addEventListener("click", () => {
+        console.log("second");
+    });
+
+    child.click();
+    // first
+
+    // 为什么有时 stopPropagation() 不足以阻止同一元素上的其他事件处理器？
+    /*
+        因为它控制的是事件在 DOM 传播路径上的传递，而不是当前元素上监听器的执行。
+        1. stopPropagation() 会阻止事件继续向其他节点传播，包括捕获阶段向目标节点传播，以及冒泡阶段向祖先节点传播。
+        2. 如果同一个元素通过 addEventListener() 注册了多个同类型事件监听器，那么即使其中一个调用了 stopPropagation()，
+        当前元素上的其他监听器仍然可以继续执行。
+        3. 如果希望既阻止事件继续传播，又阻止当前元素上尚未执行的其他监听器，应该使用 stopImmediatePropagation()。
+        4. 这两个方法都不会自动阻止事件的默认行为。如果需要阻止链接跳转或表单提交，还要根据需要使用 preventDefault()。
+    */
+</script>
+</html>

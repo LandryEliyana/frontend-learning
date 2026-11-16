@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>target 与 currentTarget</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============target 与 currentTarget=============
+    console.log("target 与 currentTarget")
+    const parent = document.createElement("div");
+    parent.id = "parent";
+
+    const child = document.createElement("button");
+    child.id = "child";
+
+    parent.append(child);
+
+    parent.addEventListener("click", function (event) {
+        console.log(event.target.id);
+        console.log(event.currentTarget.id);
+    });
+
+    child.click();
+    // child -> parent
+
+    // 为什么事件委托经常使用 event.target，而不是 event.currentTarget？如果点击的是按钮中的一个 <span>，应该如何查找到对应按钮？
+    /*
+        事件委托通常是把事件监听器绑定在父元素上，通过时间冒泡统一处理子元素的事件。
+        1. event.target 表示事件的实际目标元素。而 event.currentTarget 表示当前正在执行事件监听器的元素。
+        2. 事件委托中，监听器通常绑定在父元素上，因此 event.currentTarget 始终指向父元素，无法直接判断用户具体点击了哪个子元素。
+        3. event.target 可以帮助我们识别事件的来源，因此事件委托通常使用它来判断被点击的子元素。
+        4. 如果按钮内部存在 span、i 等嵌套元素，用户点击这些元素时，event.target 可能是内部的 span，而不是按钮本身。
+        5. 此时可以使用 event.target.closest('button')，从实际点击的元素开始向上查找最近的 button，
+        并通过 contains() 检查按钮是否属于当前委托容器。
+    */
+</script>
+</html>

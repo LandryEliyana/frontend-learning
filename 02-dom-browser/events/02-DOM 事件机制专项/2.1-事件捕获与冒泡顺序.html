@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件捕获与冒泡顺序</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============事件捕获与冒泡顺序=============
+    console.log("事件捕获与冒泡顺序")
+    const parent = document.createElement("div");
+    const child = document.createElement("button");
+
+    parent.append(child);
+    document.body.append(parent);
+
+    parent.addEventListener("click", () => {
+        console.log("parent bubble");
+    });
+
+    parent.addEventListener("click", () => {
+        console.log("parent capture");
+    }, true);  // addEventListener 是”追加监听器“，而不是赋值覆盖
+
+    child.addEventListener("click", () => {
+        console.log("child bubble");
+    });
+
+    child.addEventListener("click", () => {
+        console.log("child capture");
+    }, true);
+
+    child.click();
+    // chid capture -> parent capture ❌
+    // parent capture -> child capture -> child bubble -> parent bubble ✅
+    
+    // 什么是事件捕获阶段？什么是事件目标阶段？什么是事件冒泡阶段？
+    /*
+        DOM 事件传播主要分为三个阶段：捕获阶段、目标阶段和冒泡阶段。
+        1. 事件捕获阶段。当用户触发事件时，事件会沿着事件传播路径，从外层祖先节点向目标元素逐层传递。
+        这个过程中，可以触发祖先节点上注册的捕获型事件监听器。
+        2. 事件目标阶段。当事件传播到实际触发事件的目标元素时，就进入目标阶段。目标元素上注册的捕获型和冒泡型事件监听器都可以在这一阶段执行。
+        3. 事件冒泡阶段。如果该事件支持冒泡，并且传播没有被阻止，那么事件会从目标元素沿着祖先节点逐层向外传播，
+        触发沿途的冒泡型监听器。
+    */
+
+    // addEventListener() 第三个参数的作用是什么？
+    /*
+        addEventListener() 的第三个参数主要用于配置事件监听器的行为。
+        1. 第三个参数可以是布尔值，也可以是配置对象。如果是布尔值，表示 capture，决定监听器是否作为捕获型监听器注册。
+        2. capture: true 表示捕获型监听器，capture: false 表示非捕获型监听器，默认是 false。对于支持冒泡的事件，
+        后者通常在事件冒泡阶段执行。
+        3. 如果第三个参数是对象，还可以配置 once、passive 和 signal 等属性。once 表示监听器最多执行一次，执行后自动移除；
+        passive 表示监听器不会调用 preventDefault()；signal 可以配合 AbortController 统一移除事件监听器。
+        4. capture: false 并不意味着禁止事件捕获或开启事件冒泡，它只决定当前监听器的注册类型。
+    */
+</script>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态元素与事件委托</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============动态元素与事件委托=============
+    console.log("动态元素与事件委托")
+    const list = document.createElement("ul");
+
+    list.addEventListener("click", event => {
+        const button = event.target.closest(
+            "button[data-id]"
+        );
+
+        if (button && list.contains(button)) {
+            console.log(button.dataset.id);
+        }
+    });
+
+    list.innerHTML = `
+        <li>
+            <button data-id="7">
+            <span>删除</span>
+            </button>
+        </li>
+    `;
+
+    list.querySelector("span").click(); // 7
+
+    // 为什么监听器绑定在父元素上，点击子元素也能触发？
+    /*
+        父元素绑定的事件监听器能够响应子元素的点击，主要是因为 DOM 的事件传播机制，尤其是事件冒泡。
+        1. 当用户点击子元素时，浏览器会创建并派发一个 click 事件，事件首先经过捕获阶段，从外层祖先节点向目标元素传播。
+        2. 当事件到达被点击的子元素，进入目标阶段，执行子元素上对应的事件监听器。
+        3. 由于 click 是支持冒泡的事件，在没有阻止传播的情况下，它会从目标元素像父元素、祖先元素逐层向上传播。因此，
+        即使父元素本身没有被直接点击，绑定在父元素上的非捕获型 click 监听器仍然会执行。
+    */
+
+    // closest() 与 matches() 有什么区别？
+    /*
+        closest() 和 matches() 都是 Element 对象提供的方法，都可以接收 CSS 选择器，但它们作用不同。
+        1. matches() 用于判断当前元素是否匹配指定的 CSS 选择器。它只检查元素自身，返回布尔值 true 或 false，不会向父元素查找。
+        2. closest() 用于查找距离当前元素最近的、匹配指定选择器的元素。它首先检查元素自身，如果不匹配，就沿 DOM 祖先节点逐层向上查找，
+        找到后返回对应的 Element 对象，找不到则返回 null。
+        3. 两者都常用于事件委托。 如果只需要判断事件目标本身是否满足条件，可以使用 matches()；如果需要处理按钮内部的 span、i 等嵌套元素，
+        可以使用 closest() 找到外层按钮。
+    */
+
+    // 为什么要判断 list.contains(button)？
+    /*
+        在事件委托中，使用 list.contains(button) 主要是为了确保通过 closest() 找到的按钮属于当前事件委托容器，
+        避免误处理容器之外的元素。
+        1. closest() 会从当前元素自身开始，沿着 DOM 祖先节点不断向上查找，直到找到匹配的元素或者到达祖先链的末端。
+        它的查找范围并不会自动限制在事件监听器绑定的 list 元素内部。因此，它有可能找到位于 list 外面的祖先按钮。
+        2. list.contains(button) 可以判断按钮是否是 list 的后代元素，或者是否就是 list 自身。如果返回 false，
+        说明这个按钮不属于当前委托容器，就应该忽略该事件。
+        3. 这种检查是一种防御性编程方式。它可以避免因 DOM 嵌套结构或页面布局变化而错误处理其他组件的事件。
+    */
+
+    // 如果之后又动态添加 100 个按钮，需要为它们分别注册点击监听器吗？
+    /*
+        不一定。如果这 100 个按钮的点击处理逻辑相似，优先考虑用事件委托，而不是为每个按钮单独注册监听器。
+        1. 事件委托利用的是 DOM 事件冒泡机制。 我们可以在这些按钮的共同父元素上注册一个 click 监听器。
+        2. 当用户点击任意一个按钮时，click 事件会从按钮向父元素冒泡，因此父元素的监听器也能够接收到这个事件。
+        3. 在父元素的监听器中，可以通过 event.target 获取事件目标，再使用 closest('button') 找到实际需要处理的按钮。
+        4. 对于之后动态创建的按钮，只要它们位于这个父容器内部，点击事件也能够正常冒泡到父元素，因此不需要重新注册监听器。
+    */
+</script>
+</html>

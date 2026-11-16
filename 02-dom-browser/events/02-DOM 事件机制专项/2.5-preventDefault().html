@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>preventDefault()</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============preventDefault()=============
+    console.log("preventDefault()")
+    const form = document.createElement("form");
+
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+
+        console.log(event.defaultPrevented);
+    });
+
+    const event = new Event("submit", {
+        bubbles: true,
+        cancelable: true
+    });
+
+    const result = form.dispatchEvent(event);  // dispatchEvent 的返回值是事件派发结束时 defaultPrevented 取反
+
+    console.log(result);  // true -> false
+
+    // preventDefault() 是否会阻止事件冒泡？
+    /*
+        PreventDefault() 不会阻止事件冒泡。PreventDefault() 的作用是取消事件的默认行为，例如阻止链接跳转、表单提交等，
+        但它不会影响事件的传播过程。
+        1. preventDefault() 只负责阻止默认行为。 调用后，如果事件支持冒泡，事件仍然可以继续向父元素传播，触发父元素上的事件监听器。
+        2. stopPropagation() 才是用于阻止事件传播的方法。它可以阻止事件继续沿 DOM 传播路径传递，但不会阻止事件默认行为。
+        3. 如果既要阻止事件默认行为，又要阻止事件继续传播，就需要同时调用 preventDefault() 和 stopPropagation()。
+    */
+
+    // dispatchEvent() 返回 false 代表什么？
+    /*
+        disPatchEvent() 用于在指定元素上同步派发一个事件，并返回一个布尔值。
+        1. dispatchEvent() 返回 false，表示派发的事件是可取消的，并且在事件派发过程中被调用 preventDefault() 
+        等方式成功取消了默认行为。
+        2. 返回 true，表示事件的默认行为没有被成功取消。可能是没有调用 preventDefault()，也可能是事件本身不可取消。
+        3. dispatchEvent() 的返回值与事件是否触发成功、是否发生冒泡没有直接关系。即使事件监听器正常执行，只要默认行为被成功取消，
+        仍然会返回 false。
+    */
+
+    // 为什么要关注事件的 cancelable 属性？
+    /*
+        event.canceable 是一个只读布尔属性，用于表示当前事件是否允许通过 preventDefault() 取消默认行为。
+        1. 如果 event.cancelable 为 true，说明事件允许取消默认行为。 此时在允许取消的监听器中调用 preventDefault()，
+        通常可以成功设置事件的取消标志。
+        2. 如果 event.cancelable 为 false，说明事件不可取消。即使调用 preventDefault() 也不会产生取消效果。
+        3. 关注 canceable 可以帮助我们判断 preventDefault() 是否可能生效，避免误认为所有事件都能取消默认行为。
+        4. 还需注意 passive 配置。即使事件的 canceable 为 true，如果监听器设置了 passive: true，
+        调用 preventDefault() 也不会成功取消默认行为。
+    */
+</script>
+</html>
