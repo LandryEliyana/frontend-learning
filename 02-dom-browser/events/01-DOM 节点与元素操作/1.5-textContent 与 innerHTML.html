@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>textContent 与 innerHTML</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============textContent 与 innerHTML=============
+    console.log("textContent 与 innerHTML")
+    const box = document.createElement("div");
+
+    box.textContent = "<b>Hello</b>";
+
+    console.log(box.children.length); // 0
+    console.log(box.textContent);  // <b>Hello</b>
+    console.log(box.innerHTML);   // '' ❌  &lt;b&gt;Hello&lt;/b&gt; ✅   innerHTML 返回的是序列化后的 HTML
+
+    // 为什么 textContent 不会把字符串解析成 HTML 元素？innerHTML 和 textContent 有什么区别？将用户输入直接赋给 innerHTML 可能带来什么安全风险？
+    /*
+        textContent 和 innerHTML 都可以读取或修改 DOM 元素的内容，但它们最核心的区别是：textContent 把字符串当纯文本处，
+        而 innerHTML 会把字符串当作 HTML 标记进行解析。
+        1. textContent 不会解析 HTML。当我们给 textContent 赋值时，浏览器会将字符串作为文本内容放入 DOM，
+        而不会把其中的标签解析成新的元素节点。
+        2. innerHTML 会解析 HTML。给它赋值时，浏览器会调用 HTML 片段解析机制，将字符串解析成对应的 DOM 节点，并替换元素原有的子节点。
+        3. 两者的安全性不同。 如果将未经处理的用户输入直接赋给 innerHTML，攻击者可能构造包含恶意事件处理属性等内容的 HTML，
+        使浏览器执行非预期的 JavaScript，从而形成 DOM 型 XSS。
+        4. 这类 XSS 攻击可能导致用户敏感信息泄露、冒用用户身份执行操作，或者修改页面内容。
+    */
+</script>
+</html>

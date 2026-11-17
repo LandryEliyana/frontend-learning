@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dataset 与 classList</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============dataset 与 classList=============
+    console.log("dataset 与 classList")
+    const button = document.createElement("button");
+
+    button.dataset.userId = "1001";
+    button.classList.add("active");
+
+    console.log(button.dataset.userId);      // 1001
+    console.log(button.getAttribute("data-user-id"));  // 1001
+    console.log(button.classList.contains("active"));  // true
+
+    button.classList.toggle("active");
+
+    console.log(button.classList.contains("active"));  // false
+
+    // dataset 读取的值是什么类型？为什么不能直接假设它返回数字？
+    /*
+        dataset 读取到的属性值是字符串，而不是数字。如果对应的 data-* 属性不存在，读取结果则是 undefined。
+        1. dataset 是浏览器提供的 DOMStringMap 对象，用于访问 HTML 元素上的 data-* 自定义属性。
+        例如 data-user-id="123" 可以通过 element.dataset.userId 访问。
+        2. HTML Attribute 的值本质上是文本，浏览器不会根据字符串内容自动推断数据类型。 即使写的是 data-id="123"，
+        读取结果仍然是 "123"。
+        3. 因此不能直接假设 dataset.id 是数字。如果需要进行数值计算、大小比较或严格相等判断，应该使用 Number() 等方法显式转换，
+        并验证转换结果是否合法。
+        4. 特别需要注意，dataset 还可能读取到 "true"、"false"、"null" 等字符串，它们不会自动转换成布尔值或 null。
+    */
+</script>
+</html>

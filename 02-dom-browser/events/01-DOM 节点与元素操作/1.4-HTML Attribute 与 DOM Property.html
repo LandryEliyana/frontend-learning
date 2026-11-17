@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Attribute 与 DOM Property</title>
+</head>
+<style>
+    input {
+        width: 50px;
+        height: 10px;
+        background-color: aqua;
+    }
+</style>
+<body>
+    
+</body>
+<script>
+    // ============HTML Attribute 与 DOM Property=============
+    console.log("HTML Attribute 与 DOM Property")
+    const input = document.createElement("input");
+    document.body.append(input)
+    input.setAttribute("value", "Alice");  // 这一步设置的是 HTML Attribute，<input value="Alice">，同时 input.value 也是 Bob
+
+    input.value = "Bob";  // 这一步修改的是 DOM Property
+
+    console.log(input.getAttribute("value"));  // Bob ❌  Alice ✅
+    console.log(input.value);   // Bob
+
+    // Attribute 和 Property 有什么区别？
+    /*
+        Attribute 和 Property 都可以描述 DOM 元素的信息，但它们属于不同的层面。
+        1. Attribute 是 HTML 元素上的标记属性。例如 <input value="hello"> 中的 value，可以通过 getAttribute()、setAttribute() 和 
+        removeAttribute() 操作。Attribute 的值通常以字符串形式表示。
+        2. Property 是 DOM 元素对应的 Javascript 对象属性。例如 input.value、input.checked、button.disabled，
+        可以直接通过 Javascript 访问，值可以是字符串、布尔值、数字或对象等。
+        3. 部分 Attribute 和 Property 存在映射关系。 例如 id 属性和 element.id 通常会双向同步，
+        但并不是所有 Attribute 和 Property 都会同步。
+        4. 对于表单元素，Attribute 往往用于表示初始值或默认状态，而 Property 可以表示当前状态。例如用户修改输入框内容时，
+        input.value 会变化，但 getAttribute("value") 通常仍然保留原来的默认值。
+    */
+
+    // 为什么在处理表单输入时，通常需要读取 .value？
+    /*
+        因为它表示输入控件的当前值，能够反映用户最新输入或 JavaScript 动态修改后的内容。
+        1. HTML 中的 value Attribute 主要用于设置输入控件的初始值。通过 getAttribute("value") 读取的
+        通常是 HTML 标记中的默认值，而不是用户当前输入的内容。
+        2. DOM Property 中的 .value 表示输入控件的当前值。当用户在输入框中输入、删除或修改内容时，.value 会随之变化，
+        但对应的 value Attribute 通常不会自动更新。
+        3. 因此，在表单提交、实时校验、搜索框输入等场景中，应该使用 .value 获取最新输入。
+    */
+</script>
+</html>

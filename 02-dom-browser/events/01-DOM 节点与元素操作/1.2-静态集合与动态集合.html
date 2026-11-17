@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>静态集合与动态集合</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============静态集合与动态集合=============
+    console.log("静态集合与动态集合")
+    document.body.innerHTML = `
+        <ul id="list">
+            <li class="item">A</li>
+        </ul>
+    `;
+
+    const list = document.querySelector("#list");
+
+    const staticList = list.querySelectorAll(".item");  // querySelector 返回的是静态集合
+    const liveList = list.getElementsByClassName("item");  // getElementsByClassName 返回的是动态集合
+
+    list.insertAdjacentHTML(
+        "beforeend",
+        '<li class="item">B</li>'
+    );
+
+    console.log(staticList.length);  // 2 ❌  1 ✅
+    console.log(liveList.length);   // 2
+
+    // 为什么有些 DOM 查询集合会随着文档变化而更新，有些却不会？
+    /*
+        DOM 查询集合可以分为动态集合和静态集合，它们的区别在于是否会自动反映 DOM 结构的变化。
+        1. 动态集合会随着 DOM 的变化自动更新。例如 getElementByClassName()、getElementByTagName() 和 children 返回的集合。
+        当页面中新增、删除或修改符合条件的元素时，原来的集合就会反映最新结果。
+        2. 静态集合相当于查询时获得的一份结果快照。例如 querySelectorAll() 返回的集合。DOM 后续发生变化时，
+        原集合的成员不会自动重新计算，需要重新查询。
+        3. HTMLCollection 通常是动态集合，但 NodeList 不一定是静态集合。例如 childNodes 返回动态 NodeList，
+        而 querySelectorAll() 返回静态 NodeList。
+    */
+    
+    // querySelectorAll() 返回的是数组吗？
+    /*
+        querySelectorAll() 返回的
+        1. NodeList 是一种类似数组的 DOM 集合。它具有 length 属性，可以通过数字索引访问元素，
+        也支持 forEach() 和 for...of 遍历。
+        2. NodeList 并不继承自 Array，因此不能直接使用 map()、filter()、reduce()、push() 等数组方法。
+        3. 如果需要使用完整的数组方法，可以通过 Array.from() 或展开运算符 [...] 将其转换成真正的数组。
+    */
+</script>
+</html>

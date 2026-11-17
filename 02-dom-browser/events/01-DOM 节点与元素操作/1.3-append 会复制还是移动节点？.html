@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>append 会复制还是移动节点？</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============append 会复制还是移动节点？=============
+    console.log("append 会复制还是移动节点？")
+    const parent1 = document.createElement("div");
+    const parent2 = document.createElement("div");
+
+    const child = document.createElement("span");
+
+    parent1.append(child);
+    parent2.append(child);  // apend 是移动不是复制
+
+    console.log(parent1.children.length);  // 0
+    console.log(parent2.children.length);  // 1
+
+    console.log(child.parentNode === parent2);  // true
+
+    // 如果想在两个容器中分别保留一个相同的 DOM 节点，应该使用什么 API？
+    /*
+        应该使用 cloneNode() 方法复制节点。
+        1. 一个 DOM 节点在同一时刻只能有一个父节点。因此，如果将已存在于容器 A 中的节点，通过 append()、appendChild() 添加到容器 B 中，
+        浏览器会将该节点从 A 移动到 B，而不是复制它。
+        2. 如果希望 A 和 B 都保留对应的节点，就需要先使用 cloneNode() 创建一个新的节点对象，再将克隆节点添加到 B 中。
+        3. cloneNode(false) 表示浅克隆，只复制当前节点本身，不复制它的子节点；cloneNode(true) 表示深克隆，
+        会递归复制节点及其子节点。
+        4. 需要注意，cloneNode() 不会复制通过 addEventListener() 注册的事件监听器，也不会复制通过 onclick 属性赋值注册的事件处理函数。
+    */
+    // cloneNode(true) 和 cloneNode(false) 有何区别？
+    /*
+        cloneNode(false) 表示浅克隆，只复制当前节点本身，不复制它的子节点；cloneNode(true) 表示深克隆，会递归复制节点及其子节点。
+    */
+</script>
+</html>

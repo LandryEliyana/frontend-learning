@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node 与 Element 的区别</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Node 与 Element 的区别=============
+    console.log("Node 与 Element 的区别")
+    document.body.innerHTML = `
+        <div id="box">Hello<span>World</span></div>
+    `;
+
+    const box = document.querySelector("#box");
+
+    console.log(box.children.length);   // 1
+    console.log(box.childNodes.length);  // 2
+    console.log(box.firstChild.nodeType); // 3
+    console.log(box.lastElementChild.tagName);  // span
+
+    // Node、Element、HTMLElement 有什么关系？
+    /*
+        Node、Element 和 HTMLElement 是 DOM API 中三个不同层级的接口，它们之间存在继承关系：
+        1. Node 是最基础的节点接口。它表示 DOM 树中的节点，包括元素节点、文本节点、注释节点和文档节点等，
+        提供 parentNode、childNodes、textContent 等通用能力。
+        2. Element 继承自 Node，表示 DOM 中的元素节点。它提供 querySelector()、 、closest()、matches()、classList 
+        等元素专属的操作能力。
+        3. HTMLElement 继承自 Element，专门表示 HTML 元素。它进一步提供 innerText、style、hidden、focus()
+        等与 HTML 元素相关的功能。
+        HTMLElement 是 Element 的一种，而 Element 是 Node 的一种；反过来并不一定成立。
+    */
+
+    // children 与 childNodes 有什么区别？
+    /*
+        children 和 childNodes 都用于获取一个节点的直接子级，但它们有三个主要区别。
+        1. 包含的节点类型不同。children 只返回直接子元素节点。例如 div、span、p；而 childNodes 返回所有直接子节点，
+        包括元素节点、文本节点、注释节点等。
+        2. 返回的数据类型不同。children 返回 HTMLCollection，而 childNodes 返回 NodeList。
+        3. 两者都是动态集合。 当 DOM 中的直接子节点发生变化时，已经获取的 children 和 childNodes 集合会自动更新。
+    */
+
+    // 为什么文本也可能是 DOM 节点？
+    /*
+        1. HTML 标签通常会被解析为元素节点，而标签之间或标签内部的普通文本通常会被解析为文本节点。
+        2. 文本节点也是 DOM 节点的一种，它实现了 Text 接口，继承关系是 Text → CharacterData → Node。
+        因此，文本节点同样可以参与 DOM 树的父子关系。
+        3. 文本节点与元素节点不同。 元素节点具有 tagName、classList、closest() 等属性和方法，
+        而文本节点主要通过 textContent、nodeValue、data 等属性操作文本内容。
+        4. HTML 中的换行、缩进空格也可能形成文本节点。 因此，使用 childNodes 获取子节点时，可能包含文本节点；
+        而 children 只包含子元素。
+    */
+</script>
+</html>
