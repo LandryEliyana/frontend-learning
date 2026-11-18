@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>localStorage 的数据类型</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============localStorage 的数据类型=============
+    console.log("localStorage 的数据类型")
+    localStorage.setItem("count", 100);
+
+    const value = localStorage.getItem("count");
+
+    console.log(value);   // 100
+    console.log(typeof value);  // string
+    console.log(value === 100); // false
+
+    localStorage.removeItem("count");
+
+    // localStorage 能否直接存储 JavaScript 对象？
+    /*
+        localStorage 不能直接以 Javascript 对象的形式存储数据，它存储的是字符串类型的键值对。
+        1. 如果直接将普通对象传给 localStorage.setItem()，浏览器会将对象隐式转换为字符串，通常得到 "[object Object]"，
+        这样会丢失对象原有的结构。
+        2. 如果需要存储对象，通常使用 JSON.stringfy() 将对象序列化为 JSON 字符串，再通过 setItem() 保存。
+        3. 读取时使用 getItem() 获取字符串，再通过 JSON.parse() 将其反序列化为 JavaScript 对象。
+    */
+
+    // 如何正确存储一个 Todo 数组？
+    /*
+        如果需要将 Todo 数组保存到浏览器，通常用 localStorage 配合 JSON.stringify() 和 JSON.parse()。
+        1. localStorage 只能存储字符串。Todo 数组通常包含多个对象，因此不能直接把数组传给 setItem()，
+        否则可能被转换成普通字符串，导致数据结构丢失。
+        2. 保存时使用 JSON.stringify() 将 Todo 数组序列化成 JSON 字符串，再通过 localStorage.setItem() 持久化。
+        3. 读取时通过 getItem() 获取字符串，再使用 JSON.parse() 恢复数组。如果没有保存过数据，就初始化为空数组。
+        4. 每次新增、删除或修改 Todo 后，都需要同步更新 localStorage，否则刷新页面后可能恢复旧数据。
+    */
+
+    // 读取 JSON 数据时为什么需要考虑解析失败？
+    /*
+        因为 JSON.parse() 要求传入的字符串符合 JSON 语法。如果格式不合法，它会抛出 SyntaxError，
+        可能导致当前 Javascript 执行流程中断。
+        1. 数据来源不一定可靠。例如 localStorage 中的数据可能被其他脚本修改，接口返回的数据可能存在格式问题，
+        用户提供的内容也可能不是合法 JSON。
+        2. 即使 JSON 语法合法，解析出来的数据也不一定符合业务预期。例如 Todo 应该是数组，
+        但实际可能解析出对象、字符串或者 null。
+        3. 因此通常使用 try...catch 捕获解析异常，并通过 Array.isArray()、typeof 等方式校验数据结构。
+        4. 如果解析失败，可以根据业务场景使用默认值、显示错误提示，或者记录日志，避免错误数据直接影响页面运行。
+    */
+</script>
+</html>

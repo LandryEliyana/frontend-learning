@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URLSearchParams</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============URLSearchParams=============
+    console.log("URLSearchParams")
+    const params = new URLSearchParams(
+        "?q=js+dom&page=2&q=typescript"
+    );
+
+    console.log(params.get("q"));   // js+dom ❌  js dom   查询参数里的 + 会被解析为空格
+    console.log(params.getAll("q"));  // ['js+dom','typscript'] ❌  ['js dom', 'typscript'] ✅
+    console.log(params.has("page"));  // true
+    console.log(params.get("missing")); // undefined ❌  null ✅
+
+    // 如何在浏览器中读取当前 URL 的查询参数？URLSearchParams 对重复参数如何处理？
+    /*
+        在浏览器中，可以通过 window.location.search 获取当前 URL 的查询字符串，然后使用 URLSearchParams 进行解析。
+        1. location.search 返回 URL 中 ? 开始的查询部分，不包含 # 后面的哈希片段。
+        2. URLSearchParams 提供了 get()、getAll()、has()、set()、append() 和 delete() 等方法，能够方便地读取和操作查询参数，
+        不需要手动使用字符串分割。
+        3. 对于重复参数，URLSearchParams 会保留多个同名参数。 调用 get() 只返回第一个匹配的值，而 getAll() 会以数组形式返回所有匹配值。
+        4. 如果参数不存在，get() 返回 null，而 getAll() 返回空数组。 因此，使用前需要根据业务需求处理缺失值。
+        5. 查询参数读取出来的值都是字符串。 如果需要数字或布尔值，应该显式进行类型转换和校验，不能直接假设参数具有对应的数据类型。
+    */
+</script>
+</html>

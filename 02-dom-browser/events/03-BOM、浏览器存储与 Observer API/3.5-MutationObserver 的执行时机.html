@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MutationObserver 的执行时机</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============MutationObserver 的执行时机=============
+    console.log("MutationObserver 的执行时机")
+    const host = document.createElement("div");
+
+    const observer = new MutationObserver(records => {
+        console.log("observer", records.length);
+        observer.disconnect();
+    });
+
+    observer.observe(host, {
+        childList: true
+    });
+
+    host.append(document.createElement("span"));
+    host.append(document.createElement("b"));
+
+    console.log("sync");
+
+    Promise.resolve().then(() => {
+        console.log("promise");
+    });
+    // sync -> observer, 2 -> promise ❌  sync -> observer 2 -> promise ✅
+
+    // MutationObserver 回调是同步执行的吗？
+    /*
+        MutationObserver 的回调不是同步执行的，而是通过微任务机制异步执行。
+        1. MutationObserver 用于监听 DOM 的变化，例如子节点的添加和删除、元素属性的修改以及文本节点内容的变化。
+        2. 当 DOM 发生变化时，浏览器不会立即调用观察器的回调，而是安排一个微任务，在当前同步 Javascript 执行结束后的微任务检查点执行。
+        3. MutationObserver 与 Promise.then() 都使用微任务机制，因此它们通常会在下一个宏任务开始之前执行。
+        具体执行顺序需要考虑微任务进入队列的先后顺序。
+        4. MutationObserver 还具有批量处理的特点。如果当前同步代码中连续修改多次 DOM，浏览器通常会将这些变化记录收集起来，
+        在一次回调中通过 MutationRecord 数组交给开发者处理。
+    */
+
+    // 多次 DOM 修改是否一定对应多次回调？
+    /*
+        多次 DOM 修改不一定对应多次 MutationObserver 回调。
+        1. MutationObserver 采用的是异步批量通知机制。当 DOM 发生符合监听条件的变化时，浏览器会记录这些变化，并安排一个微任务通知观察器，
+        而不是每次修改都立即调用回调。
+        2. 如果在同一段同步代码中连续修改多次 DOM，这些变化通常会被收集起来，在一次回调中通过 MutationRecord 数组传递。
+        3. 如果在不同的微任务执行阶段继续修改 DOM，或者在观察器回调中再次修改被监听的节点，就可能安排新的通知，从而执行多次回调。
+        因此，MutationObserver 的回调次数取决于微任务调度和变化记录的收集情况，而不是简单地由 DOM 修改次数决定。
+    */
+
+    // MutationObserver 与普通 DOM 事件监听有什么区别？
+    /*
+        MutationObserver 和普通 DOM 事件监听的核心区别在于：前者用于观察 DOM 结构和属性的变化，后者用于响应浏览器或程序派发的事件。
+        1. MutationObserver 与普通 DOM 事件监听 DOM 节点的增删、属性修改和文本节点内容变化；而 addEventListener() 主要监听 click、
+        input、keydown 等事件。
+        2. 执行时机不同。Mutationobserver 使用微任务机制异步通知，而普通 DOM 事件监听器在事件被派发时通常同步执行。
+        例如 dispatchEvent() 会同步调用相应监听器。
+        3. 数据处理方式不同。MutationObserver 可以将多次 DOM 变化批量交付，通过 MutationRecord 数组获取具体变化；
+        普通事件监听器则接收对应的 Event 对象。
+        4. 传播机制不同。普通 DOM 事件可以涉及捕获、目标和冒泡阶段，而 MutationObserver 不依赖事件传播机制，
+        它通过配置的节点及监听范围观察 DOM 变化。
+        5. 应用场景不同。如果需要响应按钮点击、输入框输入，我会使用 addEventListener()；如果需要监控第三方脚本动态插入节点、修改属性等行为，
+        使用 MutationObserver。
+    */
+
+    // 为什么需要在不再使用 Observer 时调用 disconnect()？
+    /*
+        主要是为了停止不必要的 DOM 监听，避免额外的性能开销，并降低内存泄漏风险。
+        1. MutationObserver 注册后会持续观察指定节点的变化。如果业务已经不需要这些变化，但没有停止观察，
+        后续符合条件的 DOM 修改仍然可能触发回调，产生不必要的计算开销。
+        2. 观察器及其回调可能通过引用关系使相关 DOM 节点或业务对象继续存活。如果观察器仍然可以被访问，
+        就可能导致本来不再需要的对象无法及时被垃圾回收。
+        3. 在 Vue、React 等单页应用中，组件可能频繁挂载和卸载。如果每次挂载都创建观察器，却没有在卸载时清理，
+        可能产生重复监听和重复执行的问题。
+        4. disconnect() 会停止当前观察器对所有已注册目标的观察，并丢弃尚未交付的变化记录。如果需要保留这些记录，
+        可以先调用 takeRecords()。
+    */
+</script>
+</html>

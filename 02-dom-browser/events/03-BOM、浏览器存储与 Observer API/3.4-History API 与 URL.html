@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History API 与 URL</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============History API 与 URL=============
+    console.log("History API 与 URL")
+    history.replaceState(
+        { page: 2 },
+        "",
+        "?page=2#list"
+    );
+
+    console.log(location.search);  // page=2 ❌  ?page=2 ✅
+    console.log(location.hash);   // list ❌  #list ✅
+    console.log(history.state.page); // 2
+
+    // pushState() 与 replaceState() 有什么区别？它们会自动重新加载页面吗？调用 pushState() 是否会立即触发 popstate？
+    /*
+        pushState() 和 replaceState() 都属于浏览器的 History API，可以修改当前页面的 URL 和历史记录状态，
+        而不需要重新加载页面。
+        1. pushState() 会新增一条历史记录。因此，调用后用户通常可以通过浏览器的后退按钮返回之前的 URL。
+        2. replaceState() 会替换当前历史记录，不会新增历史记录条目。因此，它通常用于修改当前页面的查询参数、
+        修正 URL 等不需要额外后退步骤的场景。
+        3. 两者调用时都不会自动重新加载页面。它们主要负责修改 URL 和历史状态，并不会自动请求新页面或更新页面内容。
+        实际开发中还需要配合前端路由逻辑完成组件渲染。
+        4. 直接调用 pushState() 或 replaceState() 都不会立即触发 popstate 事件。popstate 主要在用户点击浏览器前进、后退按钮，
+        或者通过history.back()、history.forward() 等方式遍历历史记录时触发。
+        因此，pushState() 适合需要保留导航记录的页面切换，replaceState() 适合替换当前地址，而 popstate 用于响应历史记录的切换。
+    */
+</script>
+</html>

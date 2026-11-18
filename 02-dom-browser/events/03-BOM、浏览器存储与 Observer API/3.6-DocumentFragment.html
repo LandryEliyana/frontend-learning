@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocumentFragment</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============DocumentFragment=============
+    console.log("DocumentFragment")
+    const list = document.createElement("ul");
+
+    const fragment = document.createDocumentFragment();
+
+    const item1 = document.createElement("li");
+    const item2 = document.createElement("li");
+
+    fragment.append(item1);
+    fragment.append(item2);
+
+    console.log(fragment.childNodes.length);  // 2
+
+    list.append(fragment);
+
+    console.log(fragment.childNodes.length);  // 0
+    console.log(list.children.length);  // 2
+    console.log(item1.parentNode === list);  // true
+
+    // DocumentFragment 是什么？
+    /*
+        DocumentFragment 是一种轻量级的 DOM 节点容器，也叫文档片段，主要用于临时组织多个 DOM 节点。
+        1. 它属于 Node，但不是 Element，可以通哟 document.createDocumentFragment() 创建。
+        2. DocumentFragment 本身通常不直接参与页面渲染，因此可以先在其中创建和组织多个子节点。
+        3. 当我们把 DocumentFragment 插入真实 DOM 时，浏览器会将它内部的子节点移动到目标容器，而不是把 DocumentFragment 本身插进去。
+        插入完成后，原来的 DocumentFragment 会变空。
+        4. 它适合批量创建列表、表格等 DOM 结构。先在片段中组织节点，再统一插入，可以减少对已连接 DOM 的反复修改，
+        有助于优化代码结构，在某些场景下也可能减少渲染相关开销。
+    */
+
+    // 批量操作一定能带来性能提升吗？应该如何实际测量？
+    /*
+        批量操作不一定能带来性能提升，具体效果需要结合浏览器的渲染机制和实际测试结果判断。
+        1. 浏览器在 DOM 发生变化后，并不一定立即执行布局和绘制，而是可能将多次修改合并处理。因此，循环执行 100 次 appendChild()，
+        并不意味着一定发生 100 次重排。
+        2. DocumentFragment 可以先在不参与页面渲染的节点容器中组织元素，再统一插入真实 DOM。这在一些场景下有助于降低开销，
+        但创建片段、构建节点本身也有成本，所以不一定保证更快。
+        3. 实际测量时，我会使用 performance.now() 或 performance.mark() 测量 JavaScript 执行耗时，再通过 Chrome DevTools 的 Performance 面板分析 Scripting、
+        Recalculate Style、Layout 和 Paint 等阶段的耗时。
+        4. 为了保证测试可靠，需要控制数据规模、DOM 结构等变量，进行预热和多次测试，并比较中位数，而不是只运行一次就得出结论。
+    */
+</script>
+</html>
