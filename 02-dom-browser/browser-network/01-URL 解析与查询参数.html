@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL 解析与查询参数</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============URL 解析与查询参数=============
+    console.log("URL 解析与查询参数")
+    const url = new URL(
+        "https://example.com:443/products?id=1&id=2#detail"
+    );
+
+    console.log(url.protocol);   // https:
+    console.log(url.host);    // example.com:443 ❌  example.com ✅   443 是默认端口，如果是非默认端口的话就会保留
+    console.log(url.pathname);  // /products
+    console.log(url.searchParams.get("id"));  // 1
+    console.log(url.searchParams.getAll("id"));  // [1, 2] ❌  ['1', '2'] ✅
+    console.log(url.hash);   // #detail
+
+    // host 与 hostname 有什么区别？
+    /*
+        host 和 hostname 都用于获取 URL 中的主机相关信息，最主要的区别是是否包含端口号。
+        1. hostname 表示 URL 中的主机名，通常是域名或 IP 地址，不包含端口号。
+        2. host 通常由主机号和端口号组成。如果 URL 中存在非默认端口，那么 host 会包含端口号。
+        3. 如果 URL 没有显示指定端口，或者使用的是协议的默认端口，那么 host 和 hostname 通常相同。
+        4. 可以通过 location.port 单独获取端口号，但它返回的是字符串。如果没有非默认端口，通常返回空字符串。
+    */
+
+    // 为什么不建议使用简单的 split("?") 解析所有 URL？
+    /*
+        因为 URL 是具有明确语法结构的数据，而不是一个普通字符串。
+        1. URL 包含协议、主机名、端口、路径、查询参数和哈希片段等部分。简单使用 split("?") 无法可靠区分这些结构。
+        2. 查询参数中可能包含经过 URL 编码的特殊字符，例如 %3F、%26，以及表示空格的 +。如果只是手动分割字符串，
+        还需要额外处理解码问题。
+        3. URL 可能存在重复参数，例如 ?tag=js&tag=vue。简单分割无法直接得到合理的多值参数结构。
+        4. URL 还可能包含哈希片段，甚至存在多个原始问号。如果直接使用 split("?")，可能截断查询内容，
+        或者错误地把哈希片段当作查询参数的一部分。
+    */
+
+    // 如果需要修改 URL 参数，但不刷新页面，应该怎么做？
+    /*
+        1. 使用 new URL(window.location.href) 获取当前页面的 URL 对象，然后通过 url.searchParams.set() 修改指定查询参数。
+        2. 修改完成后，调用 history.replaceState() 或 history.pushState()，将新的 URL 更新到浏览器地址栏。
+        这两个方法都不会因为调用本身而重新加载页面。
+        3. 两者的区别是：replaceState() 会替换当前历史记录，适合更新筛选条件、修正参数等不需要额外后退步骤的场景；
+        pushState() 会新增历史记录，适合需要支持浏览器后退的导航操作。
+        因此，我会根据是否需要保留历史记录选择 pushState() 或 replaceState()，并配合 URLSearchParams 安全地修改参数。
+    */
+</script>
+</html>

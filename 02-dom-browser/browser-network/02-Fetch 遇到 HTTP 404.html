@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch 遇到 HTTP 404</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============Fetch 遇到 HTTP 404=============
+    console.log("Fetch 遇到 HTTP 404")
+    async function test() {
+        const response = new Response("Not Found", {
+            status: 404
+        });
+
+        console.log(response.ok);
+        console.log(response.status);
+
+        try {
+            const result = await Promise.resolve(response);
+            console.log("success");
+        } catch {
+            console.log("error");
+        }
+    }
+
+    test();
+    // false -> 404 -> error ❌  false -> 404 -> success
+
+    // HTTP 错误状态码为什么不等于 Promise 被拒绝
+    /*
+        以原生 Fetch API 为例，HTTP 错误状态码并不等于 Promise 被拒绝，HTTP 请求结果和 Promise 的状态表示的是两个不同层面的含义。
+        1. HTTP 状态码表示服务器对请求的处理结果。例如 200 表示成功，404 表示资源不存在，500 表示服务器内部错误。
+        2. fetch() 返回的 Promise 主要反映请求是否成功获得 HTTP 响应。当服务器正常返回一个 HTTP 响应时，即使状态码是 404 或 500，
+        fetch() 的 Promise 通常仍然会进入 fulfilled 状态。
+        3. 只有出现网络故障、请求被中止等情况，导致请求无法正常完成时，fetch() 的 Promise 才通常会被拒绝。
+        4. 不能只依赖 .catch() 或 try...catch 处理 HTTP 错误，还需要检查 response.ok 或 response.status。
+        5. 如果希望将 HTTP 错误统一交给 .catch() 处理，可以在 response.ok 为 false 时主动 throw 一个错误。
+        所以，HTTP 404、500 属于 HTTP 响应层面的错误，而 Promise rejected 属于 JavaScript 异步操作层面的失败，两者不能直接画等号。
+    */
+
+    // 真实 fetch() 收到 HTTP 500 时是否必然进入 catch？前端应如何正确处理 HTTP 状态码？
+    /*
+        真实的 fetch() 收到 HTTP 500 时，并不必然进入 catch。
+        1. 原生 Fetch API 不会因为 HTTP 状态码是 404、500 等错误状态，就自动将 Promise 置为 rejected。
+        只要浏览器正常获得了 HTTP 响应，fetch() 返回的 Promise 通常仍然是 fulfilled。
+        2. HTTP 状态码表示服务器处理请求的结果，而 Promise 状态表示异步操作是否成功完成，两者并不是同一个概念。
+        3. fetch() 通常在网络故障、请求被中止、CORS 导致响应不可用等情况下才会被拒绝
+        4. 在前端开发中，不能只依赖 try...catch 或 .catch() 处理 HTTP 错误，而应该在拿到响应后，主动检查 response.ok 或 response.status。
+        5. 如果 response.ok 为 false，可以根据状态码进行针对性处理，或者主动抛出错误，交给统一的异常处理逻辑。
+    */
+</script>
+</html>

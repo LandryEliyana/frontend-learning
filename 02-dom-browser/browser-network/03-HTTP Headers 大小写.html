@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Headers 大小写</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============HTTP Headers 大小写=============
+    console.log("HTTP Headers 大小写")
+    const headers = new Headers();
+
+    headers.set("Content-Type", "application/json");
+
+    console.log(headers.get("content-type"));  // application/json
+    console.log(headers.get("CONTENT-TYPE"));  // application/json
+
+    headers.set("X-Token", "abc");
+
+    console.log(headers.has("x-token"));  // true 
+    
+    // HTTP 头字段名是否区分大小写？
+    /*
+        HTTP 头字段名不区分大小写。
+        1. 根据 HTTP 协议规范，Content-Type、content-type 和 CONTENT-TYPE 表示同一个 HTTP 头字段，
+        服务器和客户端在解析时应当将它们视为等价。
+        2. 在 Javascript 的 Fetch API 中，Headers 对象同样支持不区分大小写的字段名查找。因此，
+        使用 headers.get("Content-Type") 或 headers.get("content-type")，得到的结果相同。
+        3. 在实际开发中，可以统一使用规范的字段命名方式提高代码可读性，但不能依赖字段名的大小写进行逻辑判断。
+    */
+
+    // Content-Type 与 Accept 的主要区别是什么？
+    /*
+        Content-Type 和 Accept 都与 HTTP 数据格式有关，但它们的作用不同。
+        1. Content-Type 用于描述当前 HTTP 消息体的数据类型。在请求中，它告诉服务器客户端发送的是什么格式；
+        在响应中，它告诉客户端服务器返回的是什么格式。
+        2. Accept 主要用于告诉服务器，客户端希望接收哪些格式的相应数据。例如 Accept: application/json 表示
+        客户端希望服务器返回的 JSON 格式。
+        3. Content-Type 描述的是实际发送的内容类型，而 Accept 描述的是接收方能够接受的响应内容类型。
+        4. 如果前端通过 POST 请求发送 JSON，并希望服务器返回 JSON，通常会同时设置 Content-Type: application/json 和 Accept: application/json。
+        因此，可以简单理解为：Content-Type 告诉对方“我发送的是什么”，Accept 告诉对方“我希望收到什么”。
+    */
+
+    // 浏览器是否允许 JavaScript 任意修改所有请求头？
+    /*
+        浏览器不允许 Javascript 任意修改所有 HTTP 请求头。
+        1. 浏览器允许开发者设置很多常见请求头，例如 Content-Type、Accept、Authorization，以及业务需要的自定义请求头。
+        2. 浏览器对部分请求头进行了限制，这些字段称为 Forbidden Request Headers（禁止修改的请求头）。
+        例如 Host、Content-Length、Cookie 和 Origin 等。
+        3. 限制这些请求头主要是为了维护浏览器的网络安全模型，防止网页脚本伪造某些由浏览器管理的请求信息，
+        或者干扰 Cookie、跨域请求等安全机制。
+    */
+</script>
+</html>
