@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>textContent 与 XSS</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============textContent 与 XSS=============
+    console.log("textContent 与 XSS")
+    const container = document.createElement("div");
+
+    const userInput = '<img src=x onerror=alert(1)>';
+
+    container.textContent = userInput;
+
+    console.log(container.children.length);  // 0
+
+    console.log(container.textContent === userInput);  // true
+
+    console.log(container.querySelector("img"));  // null
+
+    // 如果改成 container.innerHTML = userInput，可能有什么风险？
+    /*
+        最大的风险是 DOM 型 XSS （跨站脚本攻击）。
+        1. textContent 会把传入内容当作普通文本处理，不会解析其中的 HTML 标签，因此 <img> 只是文本，不会创建真正的图片元素。
+        2. innerHTML 会将字符串按照 HTML 进行解析，创建真实的 DOM 节点。如果字符串中包含恶意 HTML，例如带有 onerror 事件处理属性的图片标签，
+        就可能执行攻击者注入的 JavaScript。
+        3. 如果改成 container.innerHTML = userInput，<img src=x onerror=alert(1)> 会被解析成一个真实的 img 元素。当图片加载失败时，
+        onerror 事件处理代码就可能执行。
+        4. 如果用户输入未经安全处理就被赋值给 innerHTML，攻击者可能借此执行恶意代码，读取页面中可访问的数据、
+        冒用用户身份发起操作或篡改页面内容。
+    */
+
+    // 如果你要渲染 AI 大模型生成的 Markdown 内容，应该如何防止不可信内容导致 XSS？
+    /*
+        将模型输出视为不可信输入，并采用“安全解析、HTML 净化、URL 校验和浏览器安全策略”相结合的方案。
+        1. 不直接把大模型返回的 Markdown 赋值给 innerHTML，而是使用成熟的 Markdown 解析哭，将 Markdown 转换成 HTML。
+        2. 解析时尽可能关闭原声 HTML 功能，避免模型输出的 <script>、<iframe>、事件处理属性等被直接解析为危险 DOM。
+        3. 对最终生成的 HTML 使用 DOMPurify 等成熟净化库，按照白名单规则过滤危险标签、事件处理和危险 URL 协议。
+        4. 对于 Markdown 中的链接和图片，还需要控制 URL 协议，尤其防范 javascript: 等危险链接，以及可能造成隐私泄露的外部图片请求。
+        5. 在 React 或 Vue 中，应优先使用能够安全处理 Markdown 的组件。如果必须使用 dangerouslySetInnerHTML 或 v-html，
+        必须确保传入的 HTML 已经过可靠净化。
+        最后，可以通过 CSP（内容安全策略）进一步限制脚本执行，形成纵深防御。
+    */
+</script>
+</html>

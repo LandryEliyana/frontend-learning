@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>localStorage 与 JSON 序列化</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // ============localStorage 与 JSON 序列化=============
+    console.log("localStorage 与 JSON 序列化")
+    localStorage.setItem("count", 100);
+    localStorage.setItem("enabled", false);
+
+    console.log(localStorage.getItem("count"));   // 100
+    console.log(typeof localStorage.getItem("count"));  // string
+
+    console.log(localStorage.getItem("enabled"));   // false  这里的是 string 类型
+    console.log(Boolean(localStorage.getItem("enabled")));  // true
+
+    console.log(JSON.parse(localStorage.getItem("enabled")));  // false  这里的是 boolean 类型
+
+    localStorage.removeItem("count");
+    localStorage.removeItem("enabled");
+
+    // localStorage 为什么不能直接保留一个普通 JavaScript 对象的内部结构？
+    /*
+        根本原因是 Web Storage API 使用字符串形式的键值对，而不是直接存储 Javascript 对象。
+        1. localStorage.setItem() 在接收数据时，会将键和值转换为字符串。
+        2. 当传入普通 Javascript 对象时，会发生隐式类型转换。普通对象默认转换为字符串时，通常得到 "[Object Object]"，
+        而不是包含属性结构的 JSON 字符串。
+        3. 这个转换结构无法保留对象的属性名、属性及其嵌套关系，因此读取时无法恢复原来的对象结构。
+        4. 如果需要保存对象，应该通过 JSON.stringify() 显示序列化，将对象转换成具有结构信息的 JSON 字符串；
+        读取时再通过 JSON.parse() 反序列化。
+        5. JSON 序列化也存在局限，例如无法默认保留函数、原型链、循环引用等信息，因此恢复的数据通常只是结构相近的新对象，
+        而不是原来的对象引用。
+    */
+
+    // 使用 JSON.parse() 读取缓存数据时，为什么必须考虑异常处理？
+    /*
+        因为缓存中的数据不一定是合法的 JSON 字符串，而 JSON.parse() 遇到非法 JSON 时会同步抛出 SyntaxError。
+        1. localStorage 存储的是字符串，数据可能由于历史版本变更、其他代码错误写入、手动修改等原因而不符合预期的 JSON 格式。
+        2. 如果直接调用 JSON.parse() 而不处理异常，解析错误就可能中断当前 Javascript 执行流程，影响页面初始化组件渲染。
+        3. 实际开发中应该使用 try...catch 捕获异常，并提供合理的降级策略，例如使用默认配置、空数组或重新初始化缓存。
+        4. JSON 解析成功不代表数据结构一定正确。例如程序期望数组，但缓存中实际存储的是对象或 null，因此还需要进行类型和数据结构校验。
+    */
+</script>
+</html>
